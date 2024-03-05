@@ -1,4 +1,4 @@
-package connectorname
+package activemq
 
 import sdk "github.com/conduitio/conduit-connector-sdk"
 
