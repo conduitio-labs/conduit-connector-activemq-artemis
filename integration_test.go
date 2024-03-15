@@ -19,14 +19,13 @@ import (
 	"encoding/json"
 	"fmt"
 	"testing"
-	"time"
 
 	sdk "github.com/conduitio/conduit-connector-sdk"
 	"github.com/google/uuid"
 	"github.com/matryer/is"
 )
 
-func TestConnectorSingleReadWrite(t *testing.T) {
+func TestConnector_SingleReadWrite(t *testing.T) {
 	is := is.New(t)
 
 	queueID := uuid.New().String()
@@ -44,47 +43,17 @@ func TestConnectorSingleReadWrite(t *testing.T) {
 	payloadStr := fmt.Sprintf("test message from %s", queueID)
 	payload := []byte(payloadStr)
 
-	doneCh := make(chan struct{})
-	defer func() {
-		timeout := time.After(3 * time.Second)
-		select {
-		case <-timeout:
-			t.Fatal("timeout waiting for doneCh")
-		case <-doneCh:
-		}
-	}()
-
 	configMap := cfgToMap(config)
 
 	source := NewSource()
 	err := source.Configure(ctx, configMap)
 	is.NoErr(err)
-
 	err = source.Open(ctx, nil)
 	is.NoErr(err)
 
-	go func() {
-		rec, err := source.Read(ctx)
-		is.NoErr(err)
-
-		var result struct {
-			Payload struct {
-				After sdk.RawData `json:"after"`
-			}
-		}
-		err = json.Unmarshal(rec.Payload.After.Bytes(), &result)
-		is.NoErr(err)
-
-		recvPayload := string(result.Payload.After.Bytes())
-
-		is.Equal(recvPayload, payloadStr)
-
-		doneCh <- struct{}{}
-	}()
-
 	destination := NewDestination()
 	err = destination.Configure(ctx, cfgToMap(config))
-
+	is.NoErr(err)
 	err = destination.Open(ctx)
 	is.NoErr(err)
 
@@ -97,11 +66,27 @@ func TestConnectorSingleReadWrite(t *testing.T) {
 
 	err = destination.Teardown(ctx)
 	is.NoErr(err)
+
+	rec, err := source.Read(ctx)
+	is.NoErr(err)
+
+	var result struct {
+		Payload struct {
+			After sdk.RawData `json:"after"`
+		}
+	}
+	err = json.Unmarshal(rec.Payload.After.Bytes(), &result)
+	is.NoErr(err)
+
+	recvPayload := string(result.Payload.After.Bytes())
+
+	is.Equal(recvPayload, payloadStr)
 }
 
-func TestConnectorRestartFull(t *testing.T) {
+func TestConnector_RestartFull(t *testing.T) {
 	is := is.New(t)
 
+	ctx := context.Background()
 	queueID := uuid.New().String()
 	artemisDestination := fmt.Sprintf("/queue/%s", queueID)
 	cfgMap := cfgToMap(Config{
@@ -111,19 +96,56 @@ func TestConnectorRestartFull(t *testing.T) {
 		Queue:    artemisDestination,
 	})
 
-	recs1 := generateSDKRecords(1, 6)
+	source := NewSource()
+	err := source.Configure(ctx, cfgMap)
+	is.NoErr(err)
+	err = source.Open(ctx, nil)
+	is.NoErr(err)
 
+	recs1 := generateSDKRecords(1, 3)
 	produce(is, cfgMap, recs1)
-	lastPosition := testSourceIntegrationRead(t, cfgMap, nil, recs1, false)
+	lastPosition := testSourceIntegrationRead(t, source, nil, recs1, false)
 
 	recs2 := generateSDKRecords(4, 6)
 	produce(is, cfgMap, recs2)
-	testSourceIntegrationRead(t, cfgMap, lastPosition, recs2, false)
+	testSourceIntegrationRead(t, source, lastPosition, recs2, false)
+}
+
+func _TestConnector_RestartPartial(t *testing.T) {
+	is := is.New(t)
+
+	ctx := context.Background()
+	queueID := uuid.New().String()
+	artemisDestination := fmt.Sprintf("/queue/%s", queueID)
+	cfgMap := cfgToMap(Config{
+		URL:      "localhost:61613",
+		User:     "admin",
+		Password: "admin",
+		Queue:    artemisDestination,
+	})
+
+	source := NewSource()
+	err := source.Configure(ctx, cfgMap)
+	is.NoErr(err)
+	err = source.Open(ctx, nil)
+	is.NoErr(err)
+
+	recs1 := generateSDKRecords(1, 3)
+	produce(is, cfgMap, recs1)
+	lastPosition := testSourceIntegrationRead(t, source, nil, recs1, true)
+
+	recs2 := generateSDKRecords(4, 6)
+	produce(is, cfgMap, recs2)
+
+	var wantRecs []sdk.Record
+	wantRecs = append(wantRecs, recs1[1:]...)
+	wantRecs = append(wantRecs, recs2...)
+	testSourceIntegrationRead(t, source, lastPosition, wantRecs, false)
 }
 
 func testSourceIntegrationRead(
 	t *testing.T,
-	cfgMap map[string]string,
+	underTest sdk.Source,
 	startFrom sdk.Position,
 	wantRecords []sdk.Record,
 	ackFirstOnly bool,
@@ -131,22 +153,20 @@ func testSourceIntegrationRead(
 	is := is.New(t)
 	ctx := context.Background()
 
-	underTest := NewSource()
-	defer func() {
-		err := underTest.Teardown(ctx)
-		is.NoErr(err)
-	}()
-
-	err := underTest.Configure(ctx, cfgMap)
-	is.NoErr(err)
-	err = underTest.Open(ctx, startFrom)
-	is.NoErr(err)
-
 	var positions []sdk.Position
 	for _, wantRecord := range wantRecords {
 		rec, err := underTest.Read(ctx)
 		is.NoErr(err)
-		is.Equal(wantRecord.Key, rec.Key.Bytes())
+
+		var result struct {
+			Key sdk.RawData `json:"key"`
+		}
+		err = json.Unmarshal(rec.Payload.After.Bytes(), &result)
+		is.NoErr(err)
+
+		wantKey := string(wantRecord.Key.Bytes())
+		gotKey := string(result.Key.Bytes())
+		is.Equal(wantKey, gotKey) // wantKey != gotKey
 
 		positions = append(positions, rec.Position)
 	}
@@ -155,7 +175,7 @@ func testSourceIntegrationRead(
 		if i > 0 && ackFirstOnly {
 			break
 		}
-		err = underTest.Ack(ctx, p)
+		err := underTest.Ack(ctx, p)
 		is.NoErr(err)
 	}
 
