@@ -23,6 +23,8 @@ import (
 	sdk "github.com/conduitio/conduit-connector-sdk"
 	"github.com/go-stomp/stomp/v3"
 	"github.com/go-stomp/stomp/v3/frame"
+
+	"github.com/orcaman/concurrent-map/v2"
 )
 
 type Source struct {
@@ -32,7 +34,9 @@ type Source struct {
 	conn         *stomp.Conn
 	subscription *stomp.Subscription
 
-	storedMessages messageMap
+	storedMessages cmap.ConcurrentMap[string, *stomp.Message]
+
+	// storedMessages messageMap
 }
 
 type messageMap struct {
@@ -84,7 +88,7 @@ func (s *Source) Configure(ctx context.Context, cfg map[string]string) error {
 	}
 	sdk.Logger(ctx).Debug().Any("config", s.config).Msg("configured source")
 
-	s.storedMessages = newMessageMap()
+	s.storedMessages = cmap.New[*stomp.Message]()
 
 	return nil
 }
@@ -157,7 +161,7 @@ func (s *Source) Read(ctx context.Context) (sdk.Record, error) {
 		rec = sdk.Util.Source.NewRecordCreate(sdkPos, metadata, key, payload)
 
 		sdk.Logger(ctx).Trace().Str("queue", s.config.Queue).Msgf("read message")
-		s.storedMessages.add(messageID, msg)
+		s.storedMessages.Set(messageID, msg)
 
 		return rec, nil
 	}
@@ -169,7 +173,7 @@ func (s *Source) Ack(ctx context.Context, position sdk.Position) error {
 		return fmt.Errorf("failed to parse position: %w", err)
 	}
 
-	msg, ok := s.storedMessages.get(pos.MessageID)
+	msg, ok := s.storedMessages.Get(pos.MessageID)
 	if !ok {
 		return fmt.Errorf("message with ID %q not found", pos.MessageID)
 	}
@@ -178,7 +182,7 @@ func (s *Source) Ack(ctx context.Context, position sdk.Position) error {
 		return fmt.Errorf("failed to ack message: %w", err)
 	}
 
-	s.storedMessages.remove(pos.MessageID)
+	s.storedMessages.Pop(pos.MessageID)
 
 	sdk.Logger(ctx).Trace().Str("queue", s.config.Queue).Msgf("acked message")
 

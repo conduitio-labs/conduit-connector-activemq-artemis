@@ -15,8 +15,13 @@
 package activemq
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
+
+	sdk "github.com/conduitio/conduit-connector-sdk"
+	"github.com/google/uuid"
+	"github.com/matryer/is"
 )
 
 // cfgToMap converts a config struct to a map. This is useful for more type
@@ -54,4 +59,38 @@ func cfgToMap(cfg any) map[string]string {
 	}
 
 	return m
+}
+
+func generateSDKRecords(from, to int) []sdk.Record {
+	var sdkRecs []sdk.Record
+	for i := from; i < to; i++ {
+		key := []byte(fmt.Sprintf("test-key-%d", i))
+		value := []byte(fmt.Sprintf("test-payload-%d", i))
+
+		sdkRecs = append(sdkRecs, sdk.Util.Source.NewRecordCreate(
+			[]byte(uuid.NewString()),
+			sdk.Metadata{},
+			sdk.RawData(key),
+			sdk.RawData(value),
+		))
+	}
+	return sdkRecs
+}
+
+func produce(is *is.I, cfgMap map[string]string, recs []sdk.Record) {
+	ctx := context.Background()
+
+	destination := NewDestination()
+	err := destination.Configure(ctx, cfgMap)
+
+	err = destination.Open(ctx)
+	is.NoErr(err)
+
+	totalWritten, err := destination.Write(ctx, recs)
+	is.Equal(totalWritten, len(recs))
+
+	is.NoErr(err)
+
+	err = destination.Teardown(ctx)
+	is.NoErr(err)
 }
