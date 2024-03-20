@@ -59,16 +59,24 @@ func (d *Destination) Open(ctx context.Context) (err error) {
 
 func (d *Destination) Write(ctx context.Context, records []sdk.Record) (int, error) {
 	for i, rec := range records {
-		err := d.conn.Send(d.config.Queue, d.config.ContentType, rec.Bytes())
+		err := d.conn.Send(
+			d.config.Queue, d.config.ContentType, rec.Bytes(),
+			stomp.SendOpt.Receipt,
+			stomp.SendOpt.Header("destination-type", "ANYCAST"),
+		)
 		if err != nil {
 			return i, fmt.Errorf("failed to send message: %w", err)
 		}
-		sdk.Logger(ctx).Trace().Str("queue", d.config.Queue).Msg("wrote record")
+		sdk.Logger(ctx).Trace().
+			Str("queue", d.config.Queue).
+			Str("contentType", d.config.ContentType).
+			Str("destinationType", "ANYCAST").
+			Msg("wrote record")
 	}
 
 	return len(records), nil
 }
 
 func (d *Destination) Teardown(ctx context.Context) error {
-	return teardown(ctx, nil, d.conn)
+	return teardown(ctx, nil, d.conn, "destination")
 }

@@ -180,7 +180,7 @@ func connect(ctx context.Context, config Config) (*stomp.Conn, error) {
 	return conn, nil
 }
 
-func teardown(ctx context.Context, subs *stomp.Subscription, conn *stomp.Conn) error {
+func teardown(ctx context.Context, subs *stomp.Subscription, conn *stomp.Conn, label string) error {
 	if subs != nil {
 		err := subs.Unsubscribe()
 		if errors.Is(err, stomp.ErrCompletedSubscription) {
@@ -195,6 +195,8 @@ func teardown(ctx context.Context, subs *stomp.Subscription, conn *stomp.Conn) e
 			return fmt.Errorf("failed to disconnect from ActiveMQ: %w", err)
 		}
 	}
+
+	sdk.Logger(ctx).Debug().Msgf("teardown for %s complete", label)
 
 	return nil
 }

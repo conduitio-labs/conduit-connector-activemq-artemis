@@ -20,4 +20,3 @@ services:
       timeout: 20s
       retries: 100
       start_period: 100ms
-

@@ -35,8 +35,6 @@ type Source struct {
 	subscription *stomp.Subscription
 
 	storedMessages cmap.ConcurrentMap[string, *stomp.Message]
-
-	// storedMessages messageMap
 }
 
 type messageMap struct {
@@ -116,7 +114,10 @@ func (s *Source) Open(ctx context.Context, sdkPos sdk.Position) (err error) {
 		s.config.Queue = pos.Queue
 	}
 
-	s.subscription, err = s.conn.Subscribe(s.config.Queue, stomp.AckClientIndividual)
+	s.subscription, err = s.conn.Subscribe(s.config.Queue, stomp.AckClientIndividual,
+		stomp.SubscribeOpt.Header("destination-type", "ANYCAST"),
+		stomp.SubscribeOpt.Header("destination", s.config.Queue),
+	)
 	if err != nil {
 		return fmt.Errorf("failed to subscribe to queue: %w", err)
 	}
@@ -160,7 +161,13 @@ func (s *Source) Read(ctx context.Context) (sdk.Record, error) {
 
 		rec = sdk.Util.Source.NewRecordCreate(sdkPos, metadata, key, payload)
 
-		sdk.Logger(ctx).Trace().Str("queue", s.config.Queue).Msgf("read message")
+		sdk.Logger(ctx).Trace().
+			Str("queue", s.config.Queue).
+			Str("messageID", messageID).
+			Str("destination", msg.Destination).
+			Str("subscriptionDestination", msg.Subscription.Destination()).
+			Msg("read message")
+
 		s.storedMessages.Set(messageID, msg)
 
 		return rec, nil
@@ -190,5 +197,5 @@ func (s *Source) Ack(ctx context.Context, position sdk.Position) error {
 }
 
 func (s *Source) Teardown(ctx context.Context) error {
-	return teardown(ctx, s.subscription, s.conn)
+	return teardown(ctx, s.subscription, s.conn, "source")
 }
