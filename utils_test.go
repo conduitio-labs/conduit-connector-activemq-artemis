@@ -18,6 +18,8 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"math/rand"
+	"testing"
 
 	sdk "github.com/conduitio/conduit-connector-sdk"
 	"github.com/google/uuid"
@@ -93,4 +95,18 @@ func produce(is *is.I, cfgMap map[string]string, recs []sdk.Record) {
 
 	err = destination.Teardown(ctx)
 	is.NoErr(err)
+}
+
+const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+
+func randString() string {
+	b := make([]byte, 10)
+	for i := range b {
+		b[i] = charset[rand.Intn(len(charset))]
+	}
+	return string(b)
+}
+
+func uniqueQueueName(t *testing.T) string {
+	return fmt.Sprintf("%s_%s", t.Name(), uuid.New().String()[0:8])
 }

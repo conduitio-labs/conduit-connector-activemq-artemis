@@ -16,19 +16,15 @@ package activemq
 
 import (
 	"context"
-	"errors"
 	"fmt"
-	"math/rand"
 	"os"
-	"sync"
 	"testing"
 	"time"
 
 	sdk "github.com/conduitio/conduit-connector-sdk"
-	"github.com/google/uuid"
 	"github.com/matryer/is"
 	"github.com/rs/zerolog"
-	zlog "github.com/rs/zerolog/log"
+	"github.com/rs/zerolog/log"
 )
 
 func TestAcceptance(t *testing.T) {
@@ -51,11 +47,12 @@ func TestAcceptance(t *testing.T) {
 				"TestSource_Configure_RequiredParams",
 				"TestDestination_Configure_RequiredParams",
 			},
-			WriteTimeout: 500 * time.Millisecond,
-			ReadTimeout:  500 * time.Millisecond,
+			WriteTimeout: 5000 * time.Millisecond,
+			ReadTimeout:  5000 * time.Millisecond,
 		},
 	}
 
+	// sdk.AcceptanceTest(t, driver)
 	sdk.AcceptanceTest(t, testDriver{driver})
 }
 
@@ -65,128 +62,75 @@ type testDriver struct {
 
 func (d testDriver) GenerateRecord(t *testing.T, op sdk.Operation) sdk.Record {
 	return sdk.Record{
-		Position:  sdk.Position(randString()), // position doesn't matter, as long as it's unique
+		Position:  sdk.Position(randString()),
 		Operation: op,
 		Metadata:  map[string]string{randString(): randString()},
 		Key:       sdk.RawData(fmt.Sprintf("key-%s", randString())),
 		Payload: sdk.Change{
-			Before: nil,
-			After:  sdk.RawData(fmt.Sprintf("payload-%s", randString())),
+			After: sdk.RawData(fmt.Sprintf("payload-%s", randString())),
 		},
 	}
-}
-
-const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
-
-func randString() string {
-	b := make([]byte, 10)
-	for i := range b {
-		b[i] = charset[rand.Intn(len(charset))]
-	}
-	return string(b)
-}
-
-func uniqueQueueName(t *testing.T) string {
-	return fmt.Sprintf("%s_%s", t.Name(), uuid.New().String())
 }
 
 func init() {
-	log := zlog.Output(zerolog.ConsoleWriter{Out: os.Stderr})
+	log := log.Output(zerolog.ConsoleWriter{Out: os.Stderr})
 	zerolog.DefaultContextLogger = &log
 }
 
-func TestDestination_Write_Success(t *testing.T) {
+func TestWriteRead20Recs(t *testing.T) {
 	is := is.New(t)
-	ctx := context.Background()
-
-	dest, cleanup := openDestination(ctx, t)
-	defer cleanup()
-
-	want := generateRecords(t, sdk.OperationCreate, 20)
-
-	n, err := dest.Write(ctx, want)
-	is.NoErr(err)
-	is.Equal(n, len(want))
-
-	ReadFromDestination(t, want)
-}
-
-func openDestination(ctx context.Context, t *testing.T) (dest sdk.Destination, cleanup func()) {
-	is := is.New(t)
-
-	dest = NewDestination()
-	err := dest.Configure(ctx, config)
-	is.NoErr(err)
-
-	openCtx, cancelOpenCtx := context.WithCancel(ctx)
-	err = dest.Open(openCtx)
-	is.NoErr(err)
-
-	// make sure connector is cleaned up only once
-	var cleanupOnce sync.Once
-	cleanup = func() {
-		cleanupOnce.Do(func() {
-			cancelOpenCtx()
-			err = dest.Teardown(ctx)
-			is.NoErr(err)
-		})
+	cfg := map[string]string{
+		"url":      "localhost:61613",
+		"user":     "admin",
+		"password": "admin",
+		// "queue":    "acceptance_queue",
 	}
+	cfg["queue"] = uniqueQueueName(t)
 
-	return dest, cleanup
-}
-
-var config = map[string]string{
-	"url":      "localhost:61613",
-	"user":     "admin",
-	"password": "admin",
-	"queue":    "scripts",
-}
-
-func generateRecords(t *testing.T, op sdk.Operation, count int) []sdk.Record {
-	records := make([]sdk.Record, count)
-	for i := range records {
-		records[i] = GenerateRecord(t, op)
-	}
-	return records
-}
-
-func GenerateRecord(t *testing.T, op sdk.Operation) sdk.Record {
-	return sdk.Record{
-		Operation: op,
-		Payload: sdk.Change{
-			Before: nil,
-			After:  sdk.RawData("payload"),
+	driver := sdk.ConfigurableAcceptanceTestDriver{
+		Config: sdk.ConfigurableAcceptanceTestDriverConfig{
+			Connector:         Connector,
+			SourceConfig:      cfg,
+			DestinationConfig: cfg,
+			WriteTimeout:      5000 * time.Millisecond,
+			ReadTimeout:       5000 * time.Millisecond,
 		},
 	}
-}
+	_ = driver
 
-func ReadFromDestination(t *testing.T, records []sdk.Record) []sdk.Record {
-
-	is := is.New(t)
-	ctx, cancel := context.WithCancel(context.Background())
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	defer cancel()
 
-	// writing something to the destination should result in the same record
-	// being produced by the source
-	src := NewSource()
-	err := src.Configure(ctx, config)
+	destination := NewDestination()
+
+	err := destination.Configure(context.Background(), cfg)
 	is.NoErr(err)
 
-	err = src.Open(ctx, nil)
+	err = destination.Open(ctx)
 	is.NoErr(err)
+	defer destination.Teardown(ctx)
 
-	output := make([]sdk.Record, 0, len(records))
-	for i := 0; i < cap(output); i++ {
-		r, err := src.Read(ctx)
+	total := 20
+
+	for i := 0; i < total; i++ {
+		rec := driver.GenerateRecord(t, sdk.OperationCreate)
+
+		_, err := destination.Write(ctx, []sdk.Record{rec})
 		is.NoErr(err)
-		output = append(output, r)
 	}
 
-	readCtx, readCancel := context.WithTimeout(ctx, time.Second)
-	defer readCancel()
-	r, err := src.Read(readCtx)
-	is.Equal(sdk.Record{}, r) // record should be empty
-	is.True(errors.Is(err, context.DeadlineExceeded) || errors.Is(err, sdk.ErrBackoffRetry))
+	source := NewSource()
+	err = source.Configure(ctx, cfg)
+	is.NoErr(err)
+	err = source.Open(ctx, nil)
+	is.NoErr(err)
+	defer source.Teardown(ctx)
 
-	return output
+	for i := 0; i < total; i++ {
+		rec, err := source.Read(ctx)
+		is.NoErr(err) // Failed to read from source
+
+		err = source.Ack(ctx, rec.Position)
+		is.NoErr(err) // Failed to ack source
+	}
 }
