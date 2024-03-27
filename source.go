@@ -81,6 +81,7 @@ func (s *Source) Open(ctx context.Context, sdkPos sdk.Position) (err error) {
 
 	s.subscription, err = s.conn.Subscribe(s.config.Queue,
 		stomp.AckClientIndividual,
+		stomp.SubscribeOpt.Header("consumer-window-size", "-1"),
 		stomp.SubscribeOpt.Header("subscription-type", "ANYCAST"),
 		stomp.SubscribeOpt.Header("destination", s.config.Queue),
 	)
