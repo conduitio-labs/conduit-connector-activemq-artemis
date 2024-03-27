@@ -135,7 +135,7 @@ under the License.
       <critical-analyzer-policy>HALT</critical-analyzer-policy>
 
       
-      <page-sync-timeout>1220000</page-sync-timeout>
+      <page-sync-timeout>1244000</page-sync-timeout>
 
 
       <!-- the system will enter into page mode once you hit this limit. This is an estimate in bytes of how much the messages are using in memory
@@ -170,6 +170,7 @@ under the License.
          <!-- AMQP Acceptor.  Listens on default AMQP port for AMQP traffic.-->
          <acceptor name="amqp">tcp://0.0.0.0:5672?tcpSendBufferSize=1048576;tcpReceiveBufferSize=1048576;protocols=AMQP;useEpoll=true;amqpCredits=1000;amqpLowCredits=300;amqpMinLargeMessageSize=102400;amqpDuplicateDetection=true</acceptor>
 
+         <!-- STOMP Acceptor. -->
          <acceptor name="stomp">tcp://0.0.0.0:61613?tcpSendBufferSize=1048576;tcpReceiveBufferSize=1048576;protocols=STOMP;useEpoll=true</acceptor>
 
          <!-- HornetQ Compatibility Acceptor.  Enables HornetQ Core and STOMP for legacy HornetQ clients. -->

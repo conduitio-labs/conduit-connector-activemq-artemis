@@ -21,5 +21,8 @@ services:
       retries: 100
       start_period: 100ms
     volumes:
+      # broker.xml is used to customize artemis configuration
       - ./broker.xml:/var/lib/artemis-instance/etc-override/broker.xml
+      # log4j2.properties is used to add STOMP message logging. Useful for debugging
+      - ./log4j2.properties:/var/lib/artemis-instance/etc-override/log4j2.properties
 
