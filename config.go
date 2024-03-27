@@ -56,12 +56,12 @@ type Config struct {
 	// client expecting to receive heartbeat notifications from the server
 	RecvTimeoutHeartbeat time.Duration `json:"recvTimeoutHeartbeat" default:"2s"`
 
-	TLS TLSConfig `json:"tlsConfig"`
+	TLS TLSConfig `json:"tls"`
 }
 
 type TLSConfig struct {
-	// UseTLS is a flag to enable or disable TLS.
-	UseTLS bool `json:"useTLS" default:"false"`
+	// Enabled is a flag to enable or disable TLS.
+	Enabled bool `json:"enabled" default:"false"`
 
 	// ClientKeyPath is the path to the client key file.
 	ClientKeyPath string `json:"clientKeyPath"`
@@ -71,6 +71,9 @@ type TLSConfig struct {
 
 	// CaCertPath is the path to the CA certificate file.
 	CaCertPath string `json:"caCertPath"`
+
+	// InsecureSkipVerify is a flag to disable server certificate verification.
+	InsecureSkipVerify bool `json:"insecureSkipVerify" default:"false"`
 }
 
 type SourceConfig struct {
@@ -124,7 +127,7 @@ func connect(ctx context.Context, config Config) (*stomp.Conn, error) {
 		stomp.ConnOpt.HeartBeat(config.SendTimeoutHeartbeat, config.RecvTimeoutHeartbeat),
 	}
 
-	if !config.TLS.UseTLS {
+	if !config.TLS.Enabled {
 		conn, err := stomp.Dial("tcp", config.URL, connOpts...)
 		if err != nil {
 			return nil, fmt.Errorf("failed to connect to ActiveMQ: %w", err)
@@ -157,12 +160,8 @@ func connect(ctx context.Context, config Config) (*stomp.Conn, error) {
 
 		Certificates: []tls.Certificate{cert},
 		RootCAs:      caCertPool,
-	}
 
-	// version will be overwritten at compile time when building a release,
-	// so this should only be true when running in development mode.
-	if version == "(devel)" {
-		tlsConfig.InsecureSkipVerify = true
+		InsecureSkipVerify: config.TLS.InsecureSkipVerify, // #nosec G402
 	}
 
 	netConn, err := tls.Dial("tcp", config.URL, tlsConfig)
