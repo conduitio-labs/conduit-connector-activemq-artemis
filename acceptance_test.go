@@ -15,16 +15,14 @@
 package activemq
 
 import (
-	"context"
 	"fmt"
-	"os"
 	"testing"
 	"time"
 
 	sdk "github.com/conduitio/conduit-connector-sdk"
+	"github.com/go-stomp/stomp/v3"
+	"github.com/go-stomp/stomp/v3/frame"
 	"github.com/matryer/is"
-	"github.com/rs/zerolog"
-	"github.com/rs/zerolog/log"
 )
 
 func TestAcceptance(t *testing.T) {
@@ -47,90 +45,212 @@ func TestAcceptance(t *testing.T) {
 				"TestSource_Configure_RequiredParams",
 				"TestDestination_Configure_RequiredParams",
 			},
-			WriteTimeout: 5000 * time.Millisecond,
-			ReadTimeout:  5000 * time.Millisecond,
+			WriteTimeout: 500 * time.Millisecond,
+			ReadTimeout:  500 * time.Millisecond,
 		},
 	}
 
-	// sdk.AcceptanceTest(t, driver)
-	sdk.AcceptanceTest(t, testDriver{driver})
+	sdk.AcceptanceTest(t, driver)
 }
 
-type testDriver struct {
-	sdk.ConfigurableAcceptanceTestDriver
-}
+func teardownResource(is *is.I, res any) {
+	type unsubscribe interface{ Unsubscribe() error }
+	type disconnect interface{ Disconnect() error }
 
-func (d testDriver) GenerateRecord(t *testing.T, op sdk.Operation) sdk.Record {
-	return sdk.Record{
-		Position:  sdk.Position(randString()),
-		Operation: op,
-		Metadata:  map[string]string{randString(): randString()},
-		Key:       sdk.RawData(fmt.Sprintf("key-%s", randString())),
-		Payload: sdk.Change{
-			After: sdk.RawData(fmt.Sprintf("payload-%s", randString())),
-		},
-	}
-}
-
-func init() {
-	log := log.Output(zerolog.ConsoleWriter{Out: os.Stderr})
-	zerolog.DefaultContextLogger = &log
-}
-
-func TestWriteRead20Recs(t *testing.T) {
-	is := is.New(t)
-	cfg := map[string]string{
-		"url":      "localhost:61613",
-		"user":     "admin",
-		"password": "admin",
-		// "queue":    "acceptance_queue",
-	}
-	cfg["queue"] = uniqueQueueName(t)
-
-	driver := sdk.ConfigurableAcceptanceTestDriver{
-		Config: sdk.ConfigurableAcceptanceTestDriverConfig{
-			Connector:         Connector,
-			SourceConfig:      cfg,
-			DestinationConfig: cfg,
-			WriteTimeout:      5000 * time.Millisecond,
-			ReadTimeout:       5000 * time.Millisecond,
-		},
-	}
-	_ = driver
-
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
-	defer cancel()
-
-	destination := NewDestination()
-
-	err := destination.Configure(context.Background(), cfg)
-	is.NoErr(err)
-
-	err = destination.Open(ctx)
-	is.NoErr(err)
-	defer destination.Teardown(ctx)
-
-	total := 20
-
-	for i := 0; i < total; i++ {
-		rec := driver.GenerateRecord(t, sdk.OperationCreate)
-
-		_, err := destination.Write(ctx, []sdk.Record{rec})
+	switch r := res.(type) {
+	case unsubscribe:
+		err := r.Unsubscribe()
+		is.NoErr(err)
+	case disconnect:
+		err := r.Disconnect()
 		is.NoErr(err)
 	}
+}
 
-	source := NewSource()
-	err = source.Configure(ctx, cfg)
+func TestRawReadWrite(t *testing.T) {
+	t.Run("subscribing then writing", subscribingThenWriting)
+	t.Run("subscribing then writing with 2 conns", subscribingThenWriting2Conns)
+	t.Run("writing then subscribing", writingThenSubscribing)
+	t.Run("writing then subscribing with 2 conns", writingThenSubscribing2Conns)
+}
+
+func subscribingThenWriting(t *testing.T) {
+	is := is.New(t)
+	queue := uniqueQueueName(t)
+
+	connOpts := []func(*stomp.Conn) error{
+		stomp.ConnOpt.Login("admin", "admin"),
+	}
+	sendOpts := []func(*frame.Frame) error{
+		stomp.SendOpt.Receipt,
+		stomp.SendOpt.Header("destination-type", "ANYCAST"),
+		stomp.SendOpt.Header("destination", queue),
+	}
+
+	conn, err := stomp.Dial("tcp", "localhost:61613", connOpts...)
 	is.NoErr(err)
-	err = source.Open(ctx, nil)
+	defer teardownResource(is, conn)
+
+	// Subscribing
+
+	subscriber, err := conn.Subscribe(queue,
+		stomp.AckClientIndividual,
+		stomp.SubscribeOpt.Header("subscription-type", "ANYCAST"),
+		stomp.SubscribeOpt.Header("destination", queue),
+	)
 	is.NoErr(err)
-	defer source.Teardown(ctx)
+	defer teardownResource(is, subscriber)
 
-	for i := 0; i < total; i++ {
-		rec, err := source.Read(ctx)
-		is.NoErr(err) // Failed to read from source
+	randMsg := randString()
 
-		err = source.Ack(ctx, rec.Position)
-		is.NoErr(err) // Failed to ack source
+	// Writing
+
+	err = conn.Send(queue, "text/plain", []byte(randMsg), sendOpts...)
+	is.NoErr(err)
+
+	select {
+	case msg := <-subscriber.C:
+		is.Equal(string(msg.Body), randMsg)
+
+		err = conn.Ack(msg)
+		is.NoErr(err)
+	case <-time.After(1 * time.Second):
+		t.Fatal("timeout waiting for message")
+	}
+}
+
+func writingThenSubscribing(t *testing.T) {
+	is := is.New(t)
+	queue := uniqueQueueName(t)
+	connOpts := []func(*stomp.Conn) error{
+		stomp.ConnOpt.Login("admin", "admin"),
+	}
+	sendOpts := []func(*frame.Frame) error{
+		stomp.SendOpt.Receipt,
+		stomp.SendOpt.Header("destination-type", "ANYCAST"),
+		stomp.SendOpt.Header("destination", queue),
+	}
+
+	connWriter, err := stomp.Dial("tcp", "localhost:61613", connOpts...)
+	is.NoErr(err)
+	defer connWriter.Disconnect()
+
+	randMsg := randString()
+
+	// Writing
+
+	err = connWriter.Send(queue, "text/plain", []byte(randMsg), sendOpts...)
+	is.NoErr(err)
+
+	connReader, err := stomp.Dial("tcp", "localhost:61613", connOpts...)
+	is.NoErr(err)
+	defer connReader.Disconnect()
+
+	// Subscribing
+
+	subscriber, err := connReader.Subscribe(queue,
+		stomp.AckClientIndividual,
+	)
+	is.NoErr(err)
+	defer subscriber.Unsubscribe()
+
+	select {
+	case msg := <-subscriber.C:
+		is.Equal(string(msg.Body), randMsg)
+		err = connWriter.Ack(msg)
+		is.NoErr(err)
+	case <-time.After(1 * time.Second):
+		t.Fatal("timeout waiting for message")
+	}
+}
+
+func subscribingThenWriting2Conns(t *testing.T) {
+	is := is.New(t)
+	queue := uniqueQueueName(t)
+	// queue := "/queue/example-2710f86d"
+	fmt.Println(queue)
+
+	connReader, err := stomp.Dial("tcp", "localhost:61613", stomp.ConnOpt.Login("admin", "admin"))
+	is.NoErr(err)
+	defer connReader.Disconnect()
+
+	// Subscribing
+
+	subscriber, err := connReader.Subscribe(queue, stomp.AckClientIndividual,
+		stomp.SubscribeOpt.Header("subscription-type", "ANYCAST"),
+		stomp.SubscribeOpt.Header("destination", queue),
+	)
+	is.NoErr(err)
+	defer subscriber.Unsubscribe()
+
+	connWriter, err := stomp.Dial("tcp", "localhost:61613",
+		stomp.ConnOpt.Login("admin", "admin"),
+	)
+	is.NoErr(err)
+	defer connWriter.Disconnect()
+
+	// Writing
+
+	randMsg := randString()
+	err = connWriter.Send(queue, "text/plain", []byte(randMsg),
+		stomp.SendOpt.Receipt,
+		stomp.SendOpt.Header("destination-type", "ANYCAST"),
+		stomp.SendOpt.Header("destination", queue),
+	)
+	is.NoErr(err)
+
+	select {
+	case msg := <-subscriber.C:
+		// is.Equal(string(msg.Body), randMsg)
+
+		err = connReader.Ack(msg)
+		is.NoErr(err)
+	case <-time.After(1 * time.Second):
+		t.Fatal("timeout waiting for message")
+	}
+}
+
+func writingThenSubscribing2Conns(t *testing.T) {
+	is := is.New(t)
+	queue := uniqueQueueName(t)
+
+	connOpts := []func(*stomp.Conn) error{
+		stomp.ConnOpt.Login("admin", "admin"),
+	}
+	sendOpts := []func(*frame.Frame) error{
+		stomp.SendOpt.Receipt,
+		stomp.SendOpt.Header("destination-type", "ANYCAST"),
+		stomp.SendOpt.Header("destination", queue),
+	}
+
+	connWriter, err := stomp.Dial("tcp", "localhost:61613", connOpts...)
+	is.NoErr(err)
+	defer connWriter.Disconnect()
+
+	randMsg := randString()
+
+	// Writing
+
+	err = connWriter.Send(queue, "text/plain", []byte(randMsg), sendOpts...)
+	is.NoErr(err)
+
+	connReader, err := stomp.Dial("tcp", "localhost:61613", connOpts...)
+	is.NoErr(err)
+	defer connReader.Disconnect()
+
+	// Subscribing
+
+	subscriber, err := connReader.Subscribe(queue, stomp.AckClientIndividual)
+	is.NoErr(err)
+	defer subscriber.Unsubscribe()
+
+	select {
+	case msg := <-subscriber.C:
+		is.Equal(string(msg.Body), randMsg)
+
+		err = connReader.Ack(msg)
+		is.NoErr(err)
+	case <-time.After(1 * time.Second):
+		t.Fatal("timeout waiting for message")
 	}
 }

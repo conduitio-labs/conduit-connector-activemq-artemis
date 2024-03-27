@@ -108,5 +108,5 @@ func randString() string {
 }
 
 func uniqueQueueName(t *testing.T) string {
-	return fmt.Sprintf("%s_%s", t.Name(), uuid.New().String()[0:8])
+	return fmt.Sprintf("/queue/%s_%s", t.Name(), uuid.New().String()[0:8])
 }
