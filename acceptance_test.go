@@ -50,18 +50,31 @@ func TestAcceptance(t *testing.T) {
 		},
 	}
 
-	sdk.AcceptanceTest(t, driver)
+	sdk.AcceptanceTest(t, testDriver{driver})
+}
+
+type testDriver struct {
+	sdk.ConfigurableAcceptanceTestDriver
+}
+
+func (d testDriver) GenerateRecord(t *testing.T, op sdk.Operation) sdk.Record {
+	position := sdk.Position(randBytes())
+	key := sdk.RawData(fmt.Sprintf("key-%s", randString()))
+	payload := sdk.RawData(fmt.Sprintf("data-%s", randString()))
+
+	return sdk.Util.Source.NewRecordCreate(position, sdk.Metadata{}, key, payload)
+}
 }
 
 func teardownResource(is *is.I, res any) {
-	type unsubscribe interface{ Unsubscribe() error }
-	type disconnect interface{ Disconnect() error }
+	type unsubscriber interface{ Unsubscribe() error }
+	type disconnecter interface{ Disconnect() error }
 
 	switch r := res.(type) {
-	case unsubscribe:
+	case unsubscriber:
 		err := r.Unsubscribe()
 		is.NoErr(err)
-	case disconnect:
+	case disconnecter:
 		err := r.Disconnect()
 		is.NoErr(err)
 	}
