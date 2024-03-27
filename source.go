@@ -18,13 +18,12 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"sync"
 
 	sdk "github.com/conduitio/conduit-connector-sdk"
 	"github.com/go-stomp/stomp/v3"
 	"github.com/go-stomp/stomp/v3/frame"
 
-	"github.com/orcaman/concurrent-map/v2"
+	cmap "github.com/orcaman/concurrent-map/v2"
 )
 
 type Source struct {
@@ -35,40 +34,6 @@ type Source struct {
 	subscription *stomp.Subscription
 
 	storedMessages cmap.ConcurrentMap[string, *stomp.Message]
-}
-
-type messageMap struct {
-	mutex *sync.Mutex
-	msgs  map[string]*stomp.Message
-}
-
-func newMessageMap() messageMap {
-	return messageMap{
-		mutex: &sync.Mutex{},
-		msgs:  make(map[string]*stomp.Message),
-	}
-}
-
-func (m *messageMap) add(key string, msg *stomp.Message) {
-	m.mutex.Lock()
-	defer m.mutex.Unlock()
-
-	m.msgs[key] = msg
-}
-
-func (m *messageMap) get(key string) (*stomp.Message, bool) {
-	m.mutex.Lock()
-	defer m.mutex.Unlock()
-
-	msg, ok := m.msgs[key]
-	return msg, ok
-}
-
-func (m *messageMap) remove(key string) {
-	m.mutex.Lock()
-	defer m.mutex.Unlock()
-
-	delete(m.msgs, key)
 }
 
 func NewSource() sdk.Source {
@@ -114,7 +79,8 @@ func (s *Source) Open(ctx context.Context, sdkPos sdk.Position) (err error) {
 		s.config.Queue = pos.Queue
 	}
 
-	s.subscription, err = s.conn.Subscribe(s.config.Queue, stomp.AckClientIndividual,
+	s.subscription, err = s.conn.Subscribe(s.config.Queue,
+		stomp.AckClientIndividual,
 		stomp.SubscribeOpt.Header("destination-type", "ANYCAST"),
 		stomp.SubscribeOpt.Header("destination", s.config.Queue),
 	)
@@ -189,7 +155,10 @@ func (s *Source) Ack(ctx context.Context, position sdk.Position) error {
 		return fmt.Errorf("failed to ack message: %w", err)
 	}
 
-	s.storedMessages.Pop(pos.MessageID)
+	_, exists := s.storedMessages.Pop(pos.MessageID)
+	if !exists {
+		sdk.Logger(ctx).Trace().Str("messageID", pos.MessageID).Msg("message was already acked")
+	}
 
 	sdk.Logger(ctx).Trace().Str("queue", s.config.Queue).Msgf("acked message")
 
