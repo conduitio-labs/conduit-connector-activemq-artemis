@@ -108,7 +108,7 @@ func randString() string {
 }
 
 func randBytes() []byte {
-	return []byte(randString())	
+	return []byte(randString())
 }
 
 func uniqueDestinationName(t *testing.T) string {

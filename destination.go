@@ -42,7 +42,7 @@ func (d *Destination) Configure(ctx context.Context, cfg map[string]string) (err
 	if err != nil {
 		return fmt.Errorf("failed to parse config: %w", err)
 	}
-	sdk.Logger(ctx).Debug().Any("config", d.config).Msg("configured destination")
+	d.config.logConfig(ctx, "configured destination")
 
 	return nil
 }

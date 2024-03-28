@@ -49,7 +49,7 @@ func (s *Source) Configure(ctx context.Context, cfg map[string]string) error {
 	if err != nil {
 		return fmt.Errorf("failed to parse config: %w", err)
 	}
-	sdk.Logger(ctx).Debug().Any("config", s.config).Msg("configured source")
+	s.config.logConfig(ctx, "configured source")
 
 	s.storedMessages = cmap.New[*stomp.Message]()
 
@@ -117,8 +117,8 @@ func (s *Source) Read(ctx context.Context) (sdk.Record, error) {
 		var (
 			messageID = msg.Header.Get(frame.MessageId)
 			pos       = Position{
-				MessageID: messageID,
-				Destination:     s.config.Destination,
+				MessageID:   messageID,
+				Destination: s.config.Destination,
 			}
 			sdkPos   = pos.ToSdkPosition()
 			metadata = metadataFromMsg(msg)

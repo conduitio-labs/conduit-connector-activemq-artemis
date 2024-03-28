@@ -56,6 +56,15 @@ type Config struct {
 	TLS TLSConfig `json:"tls"`
 }
 
+func (c Config) logConfig(ctx context.Context, msg string) {
+	sdk.Logger(ctx).Debug().
+		Str("url", c.URL).
+		Str("destination", c.Destination).
+		Str("sendTimeoutHeartbeat", c.SendTimeoutHeartbeat.String()).
+		Str("recvTimeoutHeartbeat", c.RecvTimeoutHeartbeat.String()).
+		Bool("tlsEnabled", c.TLS.Enabled).Msg(msg)
+}
+
 type TLSConfig struct {
 	// Enabled is a flag to enable or disable TLS.
 	Enabled bool `json:"enabled" default:"false"`
