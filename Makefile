@@ -5,12 +5,7 @@ VERSION=$(shell git describe --tags --dirty --always)
 build:
 	go build -ldflags "-X 'github.com/alarbada/conduit-connector-activemq-artemis.version=${VERSION}'" -o conduit-connector-activemq-artemis cmd/connector/main.go
 
-test:
-	go test -count=1 -v -race ./...
-
-test-integration:
-	# run required docker containers, execute integration tests, stop containers after tests
-	docker compose -f test/docker-compose.yml up -d
+test: up
 	go test -v -v -race ./...; ret=$$?; \
 		docker compose -f test/docker-compose.yml down; \
 		exit $$ret
