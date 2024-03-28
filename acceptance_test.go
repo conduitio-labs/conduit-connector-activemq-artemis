@@ -15,10 +15,12 @@
 package activemq
 
 import (
+	"fmt"
 	"testing"
 	"time"
 
 	sdk "github.com/conduitio/conduit-connector-sdk"
+	"github.com/google/uuid"
 )
 
 func TestAcceptance(t *testing.T) {
@@ -57,4 +59,8 @@ func TestAcceptance(t *testing.T) {
 	}
 
 	sdk.AcceptanceTest(t, driver)
+}
+
+func uniqueDestinationName(t *testing.T) string {
+	return fmt.Sprintf("/queue/%s_%s", t.Name(), uuid.New().String()[0:8])
 }
