@@ -42,10 +42,10 @@ func TestAcceptance(t *testing.T) {
 			SourceConfig:      sourceConfig,
 			DestinationConfig: destinationConfig,
 			BeforeTest: func(t *testing.T) {
-				queue := uniqueQueueName(t)
-				sourceConfig["queue"] = queue
-				destinationConfig["queue"] = queue
-				destinationConfig["destination"] = queue
+				destination := uniqueDestinationName(t)
+				sourceConfig["destination"] = destination
+				destinationConfig["destination"] = destination
+				destinationConfig["destinationHeader"] = destination
 			},
 			Skip: []string{
 				"TestSource_Configure_RequiredParams",

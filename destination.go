@@ -60,17 +60,17 @@ func (d *Destination) Open(ctx context.Context) (err error) {
 func (d *Destination) Write(ctx context.Context, records []sdk.Record) (int, error) {
 	for i, rec := range records {
 		err := d.conn.Send(
-			d.config.Queue, "application/json", rec.Bytes(),
+			d.config.Destination, "application/json", rec.Bytes(),
 			stomp.SendOpt.Receipt,
 			stomp.SendOpt.Header("destination-type", d.config.DestinationType),
-			stomp.SendOpt.Header("destination", d.config.Destination),
+			stomp.SendOpt.Header("destination", d.config.DestinationHeader),
 		)
 		if err != nil {
 			return i, fmt.Errorf("failed to send message: %w", err)
 		}
 		sdk.Logger(ctx).Trace().
-			Str("queue", d.config.Queue).
 			Str("destination", d.config.Destination).
+			Str("destinationHeader", d.config.DestinationHeader).
 			Str("destinationType", d.config.DestinationType).
 			Msg("wrote record")
 	}

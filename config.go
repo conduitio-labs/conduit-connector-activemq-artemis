@@ -42,8 +42,8 @@ type Config struct {
 	// Password is the password to use when connecting to the broker.
 	Password string `json:"password" validate:"required"`
 
-	// Queue is the name of the queue to read from.
-	Queue string `json:"queue" validate:"required"`
+	// Destination is the name of the destination to read from.
+	Destination string `json:"destination" validate:"required"`
 
 	// SendTimeoutHeartbeat specifies the maximum amount of time between the
 	// client sending heartbeat notifications from the server
@@ -87,12 +87,12 @@ type DestinationConfig struct {
 	// ANYCAST or MULTICAST, with ANYCAST being the default.
 	DestinationType string `json:"destinationType" default:"ANYCAST" validation:"inclusion=ANYCAST|MULTICAST"`
 
-	Destination string `json:"destination"`
+	DestinationHeader string `json:"destinationHeader"`
 }
 
 type Position struct {
-	MessageID string `json:"message_id"`
-	Queue     string `json:"queue"`
+	MessageID   string `json:"message_id"`
+	Destination string `json:"destination"`
 }
 
 func parseSDKPosition(sdkPos sdk.Position) (Position, error) {

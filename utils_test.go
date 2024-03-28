@@ -111,6 +111,6 @@ func randBytes() []byte {
 	return []byte(randString())	
 }
 
-func uniqueQueueName(t *testing.T) string {
+func uniqueDestinationName(t *testing.T) string {
 	return fmt.Sprintf("/queue/%s_%s", t.Name(), uuid.New().String()[0:8])
 }

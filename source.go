@@ -68,31 +68,31 @@ func (s *Source) Open(ctx context.Context, sdkPos sdk.Position) (err error) {
 			return fmt.Errorf("failed to parse position: %w", err)
 		}
 
-		if s.config.Queue != "" && s.config.Queue != pos.Queue {
+		if s.config.Destination != "" && s.config.Destination != pos.Destination {
 			return fmt.Errorf(
-				"the old position contains a different queue name than the connector configuration (%q vs %q), please check if the configured queue name changed since the last run",
-				pos.Queue, s.config.Queue,
+				"the old position contains a different destination name than the connector configuration (%q vs %q), please check if the configured destination name changed since the last run",
+				pos.Destination, s.config.Destination,
 			)
 		}
 
-		sdk.Logger(ctx).Debug().Msg("got queue name from given position")
-		s.config.Queue = pos.Queue
+		sdk.Logger(ctx).Debug().Msg("got destination name from given position")
+		s.config.Destination = pos.Destination
 	}
 
-	s.subscription, err = s.conn.Subscribe(s.config.Queue,
+	s.subscription, err = s.conn.Subscribe(s.config.Destination,
 		stomp.AckClientIndividual,
 		stomp.SubscribeOpt.Header("consumer-window-size", s.config.ConsumerWindowSize),
 		stomp.SubscribeOpt.Header("subscription-type", s.config.SubscriptionType),
-		stomp.SubscribeOpt.Header("destination", s.config.Queue),
+		stomp.SubscribeOpt.Header("destination", s.config.Destination),
 	)
 	if err != nil {
-		return fmt.Errorf("failed to subscribe to queue: %w", err)
+		return fmt.Errorf("failed to subscribe to destination: %w", err)
 	}
 
 	sdk.Logger(ctx).Debug().
-		Str("queue", s.config.Queue).
+		Str("destination", s.config.Destination).
 		Str("subscriptionID", s.subscription.Id()).
-		Msg("subscribed to queue")
+		Msg("subscribed to destination")
 
 	sdk.Logger(ctx).Debug().Msg("opened source")
 
@@ -118,7 +118,7 @@ func (s *Source) Read(ctx context.Context) (sdk.Record, error) {
 			messageID = msg.Header.Get(frame.MessageId)
 			pos       = Position{
 				MessageID: messageID,
-				Queue:     s.config.Queue,
+				Destination:     s.config.Destination,
 			}
 			sdkPos   = pos.ToSdkPosition()
 			metadata = metadataFromMsg(msg)
@@ -129,7 +129,7 @@ func (s *Source) Read(ctx context.Context) (sdk.Record, error) {
 		rec = sdk.Util.Source.NewRecordCreate(sdkPos, metadata, key, payload)
 
 		sdk.Logger(ctx).Trace().
-			Str("queue", s.config.Queue).
+			Str("destination", s.config.Destination).
 			Str("messageID", messageID).
 			Str("destination", msg.Destination).
 			Str("subscriptionDestination", msg.Subscription.Destination()).
@@ -161,7 +161,7 @@ func (s *Source) Ack(ctx context.Context, position sdk.Position) error {
 		sdk.Logger(ctx).Trace().Str("messageID", pos.MessageID).Msg("message was already acked")
 	}
 
-	sdk.Logger(ctx).Trace().Str("queue", s.config.Queue).Msgf("acked message")
+	sdk.Logger(ctx).Trace().Str("destination", s.config.Destination).Msgf("acked message")
 
 	return nil
 }

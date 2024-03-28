@@ -9,23 +9,29 @@ import (
 
 func (DestinationConfig) Parameters() map[string]sdk.Parameter {
 	return map[string]sdk.Parameter{
-		"contentType": {
-			Default:     "text/plain",
-			Description: "contentType is the content type of the message.",
+		"destination": {
+			Default:     "",
+			Description: "destination is the name of the destination to read from.",
+			Type:        sdk.ParameterTypeString,
+			Validations: []sdk.Validation{
+				sdk.ValidationRequired{},
+			},
+		},
+		"destinationHeader": {
+			Default:     "",
+			Description: "",
+			Type:        sdk.ParameterTypeString,
+			Validations: []sdk.Validation{},
+		},
+		"destinationType": {
+			Default:     "ANYCAST",
+			Description: "destinationType is the routing type of the destination. It can be either ANYCAST or MULTICAST, with ANYCAST being the default.",
 			Type:        sdk.ParameterTypeString,
 			Validations: []sdk.Validation{},
 		},
 		"password": {
 			Default:     "",
 			Description: "password is the password to use when connecting to the broker.",
-			Type:        sdk.ParameterTypeString,
-			Validations: []sdk.Validation{
-				sdk.ValidationRequired{},
-			},
-		},
-		"queue": {
-			Default:     "",
-			Description: "queue is the name of the queue to read from.",
 			Type:        sdk.ParameterTypeString,
 			Validations: []sdk.Validation{
 				sdk.ValidationRequired{},
@@ -43,27 +49,33 @@ func (DestinationConfig) Parameters() map[string]sdk.Parameter {
 			Type:        sdk.ParameterTypeDuration,
 			Validations: []sdk.Validation{},
 		},
-		"tlsConfig.caCertPath": {
+		"tls.caCertPath": {
 			Default:     "",
 			Description: "caCertPath is the path to the CA certificate file.",
 			Type:        sdk.ParameterTypeString,
 			Validations: []sdk.Validation{},
 		},
-		"tlsConfig.clientCertPath": {
+		"tls.clientCertPath": {
 			Default:     "",
 			Description: "clientCertPath is the path to the client certificate file.",
 			Type:        sdk.ParameterTypeString,
 			Validations: []sdk.Validation{},
 		},
-		"tlsConfig.clientKeyPath": {
+		"tls.clientKeyPath": {
 			Default:     "",
 			Description: "clientKeyPath is the path to the client key file.",
 			Type:        sdk.ParameterTypeString,
 			Validations: []sdk.Validation{},
 		},
-		"tlsConfig.useTLS": {
+		"tls.enabled": {
 			Default:     "false",
-			Description: "useTLS is a flag to enable or disable TLS.",
+			Description: "enabled is a flag to enable or disable TLS.",
+			Type:        sdk.ParameterTypeBool,
+			Validations: []sdk.Validation{},
+		},
+		"tls.insecureSkipVerify": {
+			Default:     "false",
+			Description: "insecureSkipVerify is a flag to disable server certificate verification.",
 			Type:        sdk.ParameterTypeBool,
 			Validations: []sdk.Validation{},
 		},
