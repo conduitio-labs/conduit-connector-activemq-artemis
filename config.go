@@ -85,8 +85,14 @@ type TLSConfig struct {
 type SourceConfig struct {
 	Config
 
+	// ConsumerWindowSize is the size of the consumer window.
+	// It maps to the "consumer-window-size" header in the STOMP SUBSCRIBE frame.
 	ConsumerWindowSize string `json:"consumerWindowSize" default:"-1"`
-	SubscriptionType   string `json:"subscriptionType" default:"AUTO" validation:"inclusion=ANYCAST|MULTICAST"`
+
+	// SubscriptionType is the subscription type. It can be either
+	// ANYCAST or MULTICAST, with ANYCAST being the default.
+	// Maps to the "subscription-type" header in the STOMP SUBSCRIBE frame.
+	SubscriptionType string `json:"subscriptionType" default:"ANYCAST" validation:"inclusion=ANYCAST|MULTICAST"`
 }
 
 type DestinationConfig struct {
@@ -94,8 +100,11 @@ type DestinationConfig struct {
 
 	// DestinationType is the routing type of the destination. It can be either
 	// ANYCAST or MULTICAST, with ANYCAST being the default.
+	// Maps to the "destination-type" header in the STOMP SEND frame.
 	DestinationType string `json:"destinationType" default:"ANYCAST" validation:"inclusion=ANYCAST|MULTICAST"`
 
+	// DestinationHeader maps to the "destination" header in the STOMP SEND
+	// frame. Useful when using ANYCAST.
 	DestinationHeader string `json:"destinationHeader"`
 }
 

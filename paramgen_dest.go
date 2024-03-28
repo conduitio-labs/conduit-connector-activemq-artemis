@@ -19,13 +19,13 @@ func (DestinationConfig) Parameters() map[string]sdk.Parameter {
 		},
 		"destinationHeader": {
 			Default:     "",
-			Description: "",
+			Description: "destinationHeader maps to the \"destination\" header in the STOMP SEND frame. Useful when using ANYCAST.",
 			Type:        sdk.ParameterTypeString,
 			Validations: []sdk.Validation{},
 		},
 		"destinationType": {
 			Default:     "ANYCAST",
-			Description: "destinationType is the routing type of the destination. It can be either ANYCAST or MULTICAST, with ANYCAST being the default.",
+			Description: "destinationType is the routing type of the destination. It can be either ANYCAST or MULTICAST, with ANYCAST being the default. Maps to the \"destination-type\" header in the STOMP SEND frame.",
 			Type:        sdk.ParameterTypeString,
 			Validations: []sdk.Validation{},
 		},

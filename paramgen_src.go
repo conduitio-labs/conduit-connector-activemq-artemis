@@ -11,7 +11,7 @@ func (SourceConfig) Parameters() map[string]sdk.Parameter {
 	return map[string]sdk.Parameter{
 		"consumerWindowSize": {
 			Default:     "-1",
-			Description: "",
+			Description: "consumerWindowSize is the size of the consumer window. It maps to the \"consumer-window-size\" header in the STOMP SUBSCRIBE frame.",
 			Type:        sdk.ParameterTypeString,
 			Validations: []sdk.Validation{},
 		},
@@ -44,8 +44,8 @@ func (SourceConfig) Parameters() map[string]sdk.Parameter {
 			Validations: []sdk.Validation{},
 		},
 		"subscriptionType": {
-			Default:     "AUTO",
-			Description: "",
+			Default:     "ANYCAST",
+			Description: "subscriptionType is the subscription type. It can be either ANYCAST or MULTICAST, with ANYCAST being the default. Maps to the \"subscription-type\" header in the STOMP SUBSCRIBE frame.",
 			Type:        sdk.ParameterTypeString,
 			Validations: []sdk.Validation{},
 		},
