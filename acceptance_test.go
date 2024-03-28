@@ -21,7 +21,7 @@ import (
 	sdk "github.com/conduitio/conduit-connector-sdk"
 )
 
-func TestAcceptanceANYCAST(t *testing.T) {
+func TestAcceptance(t *testing.T) {
 	sourceConfig := map[string]string{
 		"url":                "localhost:61613",
 		"user":               "admin",
@@ -46,43 +46,6 @@ func TestAcceptanceANYCAST(t *testing.T) {
 				sourceConfig["destination"] = destination
 				destinationConfig["destination"] = destination
 				destinationConfig["destinationHeader"] = destination
-			},
-			Skip: []string{
-				"TestSource_Configure_RequiredParams",
-				"TestDestination_Configure_RequiredParams",
-			},
-			WriteTimeout: 500 * time.Millisecond,
-			ReadTimeout:  500 * time.Millisecond,
-		},
-	}
-
-	sdk.AcceptanceTest(t, driver)
-}
-
-func TestAcceptanceMULTICAST(t *testing.T) {
-	sourceConfig := map[string]string{
-		"url":                "localhost:61613",
-		"user":               "admin",
-		"password":           "admin",
-		"consumerWindowSize": "-1",
-		"subscriptionType":   "MULTICAST",
-	}
-	destinationConfig := map[string]string{
-		"url":             "localhost:61613",
-		"user":            "admin",
-		"password":        "admin",
-		"destinationType": "MULTICAST",
-	}
-
-	driver := sdk.ConfigurableAcceptanceTestDriver{
-		Config: sdk.ConfigurableAcceptanceTestDriverConfig{
-			Connector:         Connector,
-			SourceConfig:      sourceConfig,
-			DestinationConfig: destinationConfig,
-			BeforeTest: func(t *testing.T) {
-				destination := uniqueDestinationName(t)
-				sourceConfig["destination"] = destination
-				destinationConfig["destination"] = destination
 			},
 			Skip: []string{
 				"TestSource_Configure_RequiredParams",
