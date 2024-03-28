@@ -45,9 +45,6 @@ type Config struct {
 	// Queue is the name of the queue to read from.
 	Queue string `json:"queue" validate:"required"`
 
-	// ContentType is the content type of the message.
-	ContentType string `json:"contentType" default:"text/plain"`
-
 	// SendTimeoutHeartbeat specifies the maximum amount of time between the
 	// client sending heartbeat notifications from the server
 	SendTimeoutHeartbeat time.Duration `json:"sendTimeoutHeartbeat" default:"2s"`
@@ -78,10 +75,19 @@ type TLSConfig struct {
 
 type SourceConfig struct {
 	Config
+
+	ConsumerWindowSize string `json:"consumerWindowSize" default:"-1"`
+	SubscriptionType   string `json:"subscriptionType" default:"AUTO" validation:"inclusion=ANYCAST|MULTICAST"`
 }
 
 type DestinationConfig struct {
 	Config
+
+	// DestinationType is the routing type of the destination. It can be either
+	// ANYCAST or MULTICAST, with ANYCAST being the default.
+	DestinationType string `json:"destinationType" default:"ANYCAST" validation:"inclusion=ANYCAST|MULTICAST"`
+
+	Destination string `json:"destination"`
 }
 
 type Position struct {

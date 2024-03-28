@@ -22,19 +22,30 @@ import (
 )
 
 func TestAcceptance(t *testing.T) {
-	cfg := map[string]string{
-		"url":      "localhost:61613",
-		"user":     "admin",
-		"password": "admin",
+	sourceConfig := map[string]string{
+		"url":                "localhost:61613",
+		"user":               "admin",
+		"password":           "admin",
+		"consumerWindowSize": "-1",
+		"subscriptionType":   "ANYCAST",
+	}
+	destinationConfig := map[string]string{
+		"url":             "localhost:61613",
+		"user":            "admin",
+		"password":        "admin",
+		"destinationType": "ANYCAST",
 	}
 
 	driver := sdk.ConfigurableAcceptanceTestDriver{
 		Config: sdk.ConfigurableAcceptanceTestDriverConfig{
 			Connector:         Connector,
-			SourceConfig:      cfg,
-			DestinationConfig: cfg,
+			SourceConfig:      sourceConfig,
+			DestinationConfig: destinationConfig,
 			BeforeTest: func(t *testing.T) {
-				cfg["queue"] = uniqueQueueName(t)
+				queue := uniqueQueueName(t)
+				sourceConfig["queue"] = queue
+				destinationConfig["queue"] = queue
+				destinationConfig["destination"] = queue
 			},
 			Skip: []string{
 				"TestSource_Configure_RequiredParams",
