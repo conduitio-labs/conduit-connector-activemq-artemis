@@ -24,6 +24,7 @@ import (
 	sdk "github.com/conduitio/conduit-connector-sdk"
 	"github.com/go-stomp/stomp/v3"
 	"github.com/go-stomp/stomp/v3/frame"
+	"github.com/goccy/go-json"
 	cmap "github.com/orcaman/concurrent-map/v2"
 )
 

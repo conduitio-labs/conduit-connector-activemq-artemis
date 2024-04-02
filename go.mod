@@ -5,8 +5,10 @@ go 1.22.0
 require (
 	github.com/conduitio/conduit-connector-sdk v0.8.0
 	github.com/go-stomp/stomp/v3 v3.1.0
+	github.com/goccy/go-json v0.10.2
 	github.com/golangci/golangci-lint v1.57.1
 	github.com/google/uuid v1.6.0
+	github.com/matryer/is v1.4.1
 	github.com/orcaman/concurrent-map/v2 v2.0.1
 )
 
@@ -69,7 +71,6 @@ require (
 	github.com/go-viper/mapstructure/v2 v2.0.0-alpha.1 // indirect
 	github.com/go-xmlfmt/xmlfmt v1.1.2 // indirect
 	github.com/gobwas/glob v0.2.3 // indirect
-	github.com/goccy/go-json v0.10.2 // indirect
 	github.com/gofrs/flock v0.8.1 // indirect
 	github.com/golang/protobuf v1.5.4 // indirect
 	github.com/golangci/dupl v0.0.0-20180902072040-3e9179ac440a // indirect
@@ -114,7 +115,6 @@ require (
 	github.com/maratori/testableexamples v1.0.0 // indirect
 	github.com/maratori/testpackage v1.1.1 // indirect
 	github.com/matoous/godox v0.0.0-20240105082147-c5b5e0e7c0c0 // indirect
-	github.com/matryer/is v1.4.1 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
 	github.com/mattn/go-runewidth v0.0.15 // indirect
