@@ -53,6 +53,7 @@ func TestAcceptance(t *testing.T) {
 				destinationConfig["destinationHeader"] = destination
 			},
 			Skip: []string{
+				// Configure tests are faulty since we rely on paramgen to validate required parameters.
 				"TestSource_Configure_RequiredParams",
 				"TestDestination_Configure_RequiredParams",
 			},
