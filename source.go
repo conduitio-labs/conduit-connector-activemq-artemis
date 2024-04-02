@@ -15,9 +15,11 @@
 package activemq
 
 import (
+	"bytes"
 	"context"
 	"errors"
 	"fmt"
+	"strings"
 
 	sdk "github.com/conduitio/conduit-connector-sdk"
 	"github.com/go-stomp/stomp/v3"
@@ -143,6 +145,35 @@ func (s *Source) Read(ctx context.Context) (sdk.Record, error) {
 	}
 }
 
+// metadataFromMsg extracts all the present headers from a stomp.Message into
+// sdk.Metadata.
+func metadataFromMsg(msg *stomp.Message) sdk.Metadata {
+	metadata := make(sdk.Metadata)
+
+	for i := range msg.Header.Len() {
+		k, v := msg.Header.GetAt(i)
+
+		// Prefix to avoid collisions with other metadata keys
+		headerKey := "activemq.header." + k
+
+		// According to the STOMP protocol, headers can have multiple values for
+		// the same key. We concatenate them with a comma and a space.
+		if headerVal, ok := metadata[headerKey]; ok {
+			var sb strings.Builder
+			sb.Grow(len(headerVal) + len(v) + 2)
+			sb.WriteString(headerVal)
+			sb.WriteString(", ")
+			sb.WriteString(v)
+
+			metadata[headerKey] = sb.String()
+		} else {
+			metadata[headerKey] = v
+		}
+	}
+
+	return metadata
+}
+
 func (s *Source) Ack(ctx context.Context, position sdk.Position) error {
 	pos, err := parseSDKPosition(position)
 	if err != nil {
@@ -170,4 +201,30 @@ func (s *Source) Ack(ctx context.Context, position sdk.Position) error {
 
 func (s *Source) Teardown(ctx context.Context) error {
 	return teardown(ctx, s.subscription, s.conn, "source")
+}
+
+type Position struct {
+	MessageID   string `json:"message_id"`
+	Destination string `json:"destination"`
+}
+
+func parseSDKPosition(sdkPos sdk.Position) (Position, error) {
+	decoder := json.NewDecoder(bytes.NewBuffer(sdkPos))
+	decoder.DisallowUnknownFields()
+
+	var p Position
+	if err := decoder.Decode(&p); err != nil {
+		return p, fmt.Errorf("failed to decode position: %w", err)
+	}
+	return p, nil
+}
+
+func (p Position) ToSdkPosition() sdk.Position {
+	bs, err := json.Marshal(p)
+	if err != nil {
+		// this should never happen
+		panic(err)
+	}
+
+	return sdk.Position(bs)
 }
