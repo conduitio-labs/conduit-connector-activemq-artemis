@@ -25,10 +25,10 @@ import (
 
 func TestAcceptance(t *testing.T) {
 	sourceConfig := map[string]string{
-		"url":                "localhost:61613",
-		"user":               "admin",
-		"password":           "admin",
-		"subscriptionType":   "ANYCAST",
+		"url":              "localhost:61613",
+		"user":             "admin",
+		"password":         "admin",
+		"subscriptionType": "ANYCAST",
 
 		// we want to disable artemis flow control, so that messages are delivered as soon as possible.
 		// This prevents source reads from timing out in unexpected ways.
