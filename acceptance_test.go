@@ -28,8 +28,11 @@ func TestAcceptance(t *testing.T) {
 		"url":                "localhost:61613",
 		"user":               "admin",
 		"password":           "admin",
-		"consumerWindowSize": "-1",
 		"subscriptionType":   "ANYCAST",
+
+		// we want to disable artemis flow control, so that messages are delivered as soon as possible.
+		// This prevents source reads from timing out in unexpected ways.
+		"consumerWindowSize": "-1",
 	}
 	destinationConfig := map[string]string{
 		"url":             "localhost:61613",
