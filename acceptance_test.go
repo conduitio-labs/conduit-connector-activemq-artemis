@@ -23,7 +23,6 @@ import (
 	"github.com/google/uuid"
 )
 
-
 func uniqueDestinationName(t *testing.T) string {
 	hash := uuid.New().String()[0:8]
 	return fmt.Sprintf("/queue/%s_%s", t.Name(), hash)
