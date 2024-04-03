@@ -190,10 +190,7 @@ func (s *Source) Ack(ctx context.Context, position sdk.Position) error {
 		return fmt.Errorf("failed to ack message: %w", err)
 	}
 
-	_, exists := s.storedMessages.Pop(pos.MessageID)
-	if !exists {
-		sdk.Logger(ctx).Trace().Str("messageID", pos.MessageID).Msg("message was already acked")
-	}
+	s.storedMessages.Pop(pos.MessageID)
 
 	sdk.Logger(ctx).Trace().Str("destination", s.config.Destination).Msgf("acked message")
 
