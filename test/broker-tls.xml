@@ -151,7 +151,7 @@ under the License.
 
 	  <acceptors>
 		  <acceptor name="netty">
-			  tcp://0.0.0.0:61617?protocols=STOMP;sslEnabled=true;keyStorePath=/certs/broker.ks;keyStorePassword=password;trustStorePath=/certs/client.ts;needClientAuth=true
+			  tcp://0.0.0.0:61617?protocols=STOMP;sslEnabled=true;keyStorePath=/certs/broker.ks;keyStorePassword=password;trustStorePath=/certs/client.ts
 		  </acceptor>
 	  </acceptors>
 

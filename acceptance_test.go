@@ -18,7 +18,6 @@ import (
 	"context"
 	"fmt"
 	"log"
-	"strings"
 	"testing"
 	"time"
 
@@ -82,14 +81,14 @@ func TestServerTLSConfiguration(t *testing.T) {
 		Destination: destination,
 		TLS: TLSConfig{
 			Enabled:            true,
-			ClientKeyPath:      "test/certs/client_key.pem",
-			ClientCertPath:     "test/certs/client_cert.pem",
-			CaCertPath:         "test/certs/broker_cert",
+			ClientKeyPath:      "./test/certs/client_key.pem",
+			ClientCertPath:     "./test/certs/client_cert.pem",
+			CaCertPath:         "./test/certs/broker_cert",
 			InsecureSkipVerify: true,
 		},
 	})
 	if err != nil {
-		log.Fatal("Failed to dial to ActiveMQ:", err)
+		log.Fatal("Failed to dial to ActiveMQ: ", err)
 	}
 	defer conn.Disconnect()
 
