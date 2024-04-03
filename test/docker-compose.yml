@@ -31,7 +31,6 @@ services:
     container_name: activemq-artemis-tls
     ports:
       - "61617:61617" # stomp-tls
-      - "8161:8161"   # admin
 
     environment:
       ARTEMIS_USER: "admin"
