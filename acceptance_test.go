@@ -29,7 +29,7 @@ func uniqueDestinationName(t *testing.T) string {
 	return fmt.Sprintf("/queue/%s_%s", t.Name(), hash)
 }
 
-func TestAcceptance(t *testing.T) {
+func TestAcceptance_ANYCAST(t *testing.T) {
 	sourceConfig := map[string]string{
 		"url":              "localhost:61613",
 		"user":             "admin",
@@ -71,7 +71,7 @@ func TestAcceptance(t *testing.T) {
 	sdk.AcceptanceTest(t, driver)
 }
 
-func TestTLSAcceptance(t *testing.T) {
+func TestAcceptance_ANYCAST_TLS(t *testing.T) {
 	sourceConfig := map[string]string{
 		"url":              "localhost:61617",
 		"user":             "admin",
