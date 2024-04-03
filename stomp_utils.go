@@ -71,13 +71,13 @@ func connect(ctx context.Context, config Config) (*stomp.Conn, error) {
 
 	netConn, err := tls.Dial("tcp", config.URL, tlsConfig)
 	if err != nil {
-		panic(err)
+		return nil, fmt.Errorf("failed to connect to ActiveMQ using tls: %w", err)
 	}
 	sdk.Logger(ctx).Debug().Msg("TLS connection established")
 
 	conn, err := stomp.Connect(netConn, connOpts...)
 	if err != nil {
-		return nil, fmt.Errorf("failed to connect to ActiveMQ: %w", err)
+		return nil, fmt.Errorf("failed to connect to ActiveMQ with tls connection: %w", err)
 	}
 	sdk.Logger(ctx).Debug().Msg("STOMP connection using tls established")
 

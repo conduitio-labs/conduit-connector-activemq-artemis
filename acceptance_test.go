@@ -15,11 +15,15 @@
 package activemq
 
 import (
+	"context"
 	"fmt"
+	"log"
+	"strings"
 	"testing"
 	"time"
 
 	sdk "github.com/conduitio/conduit-connector-sdk"
+	"github.com/go-stomp/stomp/v3"
 	"github.com/google/uuid"
 )
 
@@ -67,4 +71,53 @@ func TestAcceptance(t *testing.T) {
 
 func uniqueDestinationName(t *testing.T) string {
 	return fmt.Sprintf("/queue/%s_%s", t.Name(), uuid.New().String()[0:8])
+}
+
+func TestServerTLSConfiguration(t *testing.T) {
+	destination := "/queue/test"
+	conn, err := connect(context.Background(), Config{
+		URL:         "localhost:61617",
+		User:        "admin",
+		Password:    "admin",
+		Destination: destination,
+		TLS: TLSConfig{
+			Enabled:            true,
+			ClientKeyPath:      "test/certs/client_key.pem",
+			ClientCertPath:     "test/certs/client_cert.pem",
+			CaCertPath:         "test/certs/broker_cert",
+			InsecureSkipVerify: true,
+		},
+	})
+	if err != nil {
+		log.Fatal("Failed to dial to ActiveMQ:", err)
+	}
+	defer conn.Disconnect()
+
+	// Send a message to a destination
+	message := "Hello, ActiveMQ Artemis with TLS!"
+	err = conn.Send(destination, "text/plain", []byte(message), nil)
+	if err != nil {
+		log.Fatal("Failed to send message:", err)
+	}
+	fmt.Println("Message sent successfully!")
+
+	// Subscribe to the destination
+	sub, err := conn.Subscribe(destination, stomp.AckClient)
+	if err != nil {
+		log.Fatal("Failed to subscribe to destination:", err)
+	}
+	defer sub.Unsubscribe()
+
+	// Receive messages from the subscription
+	for {
+		msg := <-sub.C
+		if msg == nil {
+			break
+		}
+		fmt.Println("Received message:", string(msg.Body))
+		msg.Conn.Ack(msg)
+	}
+
+	// Wait for a short duration before disconnecting
+	time.Sleep(1 * time.Second)
 }
