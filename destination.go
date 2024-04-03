@@ -22,6 +22,19 @@ import (
 	"github.com/go-stomp/stomp/v3"
 )
 
+type DestinationConfig struct {
+	Config
+
+	// DestinationType is the routing type of the destination. It can be either
+	// ANYCAST or MULTICAST, with ANYCAST being the default.
+	// Maps to the "destination-type" header in the STOMP SEND frame.
+	DestinationType string `json:"destinationType" default:"ANYCAST" validation:"inclusion=ANYCAST|MULTICAST"`
+
+	// DestinationHeader maps to the "destination" header in the STOMP SEND
+	// frame. Useful when using ANYCAST.
+	DestinationHeader string `json:"destinationHeader"`
+}
+
 type Destination struct {
 	sdk.UnimplementedDestination
 	config DestinationConfig
