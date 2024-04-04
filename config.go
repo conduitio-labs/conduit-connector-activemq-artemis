@@ -25,7 +25,7 @@ import (
 //go:generate paramgen -output=paramgen_dest.go DestinationConfig
 
 type Config struct {
-	// URL is the URL of the ActiveMQ classic broker.
+	// URL is the URL of the ActiveMQ Artemis broker.
 	URL string `json:"url" validate:"required"`
 
 	// User is the username to use when connecting to the broker.
@@ -34,7 +34,7 @@ type Config struct {
 	// Password is the password to use when connecting to the broker.
 	Password string `json:"password" validate:"required"`
 
-	// Destination is the name of the destination to read from.
+	// Destination is the name of the STOMP destination.
 	Destination string `json:"destination" validate:"required"`
 
 	// SendTimeoutHeartbeat specifies the maximum amount of time between the

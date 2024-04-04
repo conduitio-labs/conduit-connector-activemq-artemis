@@ -1,36 +1,58 @@
-# Conduit Connector for <resource>
-[Conduit](https://conduit.io) for <resource>.
+# Conduit Connector for Activemq Artemis
+
+The ActiveMQ Classic connector is one of [Conduit](https://conduit.io) plugins. The connector provides both a source and a destination connector for [ActiveMQ Artemis](https://activemq.apache.org/components/artemis/).
+
+It uses the [stomp protocol](https://stomp.github.io/) to connect to ActiveMQ.
+
+## What data does the OpenCDC record consist of?
+
+| Field                   | Description                                                                          |
+|-------------------------|--------------------------------------------------------------------------------------|
+| `record.Position`       | json object with the destination and the messageId frame header.                     |
+| `record.Operation`      | currently fixed as "create".                                                         |
+| `record.Metadata`       | a string to string map, with keys prefixed as `activemq.header.{STOMP_HEADER_NAME}`. |
+| `record.Key`            | the messageId frame header.                                                          |
+| `record.Payload.Before` | <empty>                                                                              |
+| `record.Payload.After`  | the message body                                                                     |
+
 
 ## How to build?
 Run `make build` to build the connector.
 
 ## Testing
-Run `make test` to run all the unit tests. Run `make test-integration` to run the integration tests.
+Run `make test` to run all the tests. The command will handle starting and stopping docker containers for you.
 
-The Docker compose file at `test/docker-compose.yml` can be used to run the required resource locally.
+## Configuration
 
-## Source
-A source connector pulls data from an external resource and pushes it to downstream resources via Conduit.
+Both source and destination connectors share the following parameters:
 
-### Configuration
+| name | description | required | default value |
+| ---- | ----------- | -------- | ------------- |
+| `url` | URL of the ActiveMQ Artemis broker. | true |  |
+| `user` | The username to use when connecting to the broker. | true |  |
+| `password` | The password to use when connecting to the broker. | true |  |
+| `destination` | The name of the STOMP destination. | true |  |
+| `sendTimeoutHeartbeat` | Specifies the maximum amount of time between the client sending heartbeat notifications from the server. | true | 2s (*) |
+| `recvTimeoutHeartbeat` | Specifies the minimum amount of time between the client expecting to receive heartbeat notifications from the server. | true | 2s (*) |
+| `tls.enabled` | Flag to enable or disable TLS. | false | `false` |
+| `tls.clientKeyPath` | Path to the client key file. | false |  |
+| `tls.clientCertPath` | Path to the client certificate file. | false |  |
+| `tls.caCertPath` | Path to the CA certificate file. | false |  |
+| `tls.insecureSkipVerify` | Flag to skip verification of the server's certificate chain and host name | false |  |
 
-| name                  | description                           | required | default value |
-|-----------------------|---------------------------------------|----------|---------------|
-| `source_config_param` | Description of `source_config_param`. | true     | 1000          |
+(*) Valid time units are "ns", "us" (or "µs"), "ms", "s", "m", "h".
 
-## Destination
-A destination connector pushes data from upstream resources to an external resource via Conduit.
 
-### Configuration
+### Source configuration
 
-| name                       | description                                | required | default value |
-|----------------------------|--------------------------------------------|----------|---------------|
-| `destination_config_param` | Description of `destination_config_param`. | true     | 1000          |
+| name | description | required | default value |
+| ---- | ----------- | -------- | ------------- |
+| `consumerWindowSize` | The size of the consumer window. It maps to the "consumer-window-size" header in the STOMP SUBSCRIBE frame. | false | -1 |
+| `subscriptionType` | The subscription type. It can be either ANYCAST or MULTICAST, with ANYCAST being the default. Maps to the "subscription-type" header in the STOMP SUBSCRIBE frame. | false | ANYCAST |
 
-## Known Issues & Limitations
-* Known issue A
-* Limitation A
+### Destination configuration
 
-## Planned work
-- [ ] Item A
-- [ ] Item B
+| name | description | required | default value |
+| ---- | ----------- | -------- | ------------- |
+| `destinationType` | The routing type of the destination. It can be either ANYCAST or MULTICAST, with ANYCAST being the default. Maps to the "destination-type" header in the STOMP SEND frame. | false | ANYCAST |
+| `destinationHeader` | Maps to the "destination" header in the STOMP SEND frame. Useful when using ANYCAST. | false | |
