@@ -11,7 +11,7 @@ func (DestinationConfig) Parameters() map[string]sdk.Parameter {
 	return map[string]sdk.Parameter{
 		"destination": {
 			Default:     "",
-			Description: "destination is the name of the destination to read from.",
+			Description: "destination is the name of the STOMP destination.",
 			Type:        sdk.ParameterTypeString,
 			Validations: []sdk.Validation{
 				sdk.ValidationRequired{},
@@ -81,7 +81,7 @@ func (DestinationConfig) Parameters() map[string]sdk.Parameter {
 		},
 		"url": {
 			Default:     "",
-			Description: "url is the url of the ActiveMQ classic broker.",
+			Description: "url is the url of the ActiveMQ Artemis broker.",
 			Type:        sdk.ParameterTypeString,
 			Validations: []sdk.Validation{
 				sdk.ValidationRequired{},
