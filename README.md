@@ -56,3 +56,59 @@ Both source and destination connectors share the following parameters:
 | ---- | ----------- | -------- | ------------- |
 | `destinationType` | The routing type of the destination. It can be either ANYCAST or MULTICAST, with ANYCAST being the default. Maps to the "destination-type" header in the STOMP SEND frame. | false | ANYCAST |
 | `destinationHeader` | Maps to the "destination" header in the STOMP SEND frame. Useful when using ANYCAST. | false | |
+
+
+## Example pipeline.yml file
+
+Here's an example of a `pipeline.yml` file using `file to activemq artemis` and `activemq artemis to file` pipelines: 
+
+```yaml
+version: 2.0
+pipelines:
+  - id: file-to-activemq-artemis
+    status: running
+    connectors:
+      - id: file.in
+        type: source
+        plugin: builtin:file
+        name: file-destination
+        settings:
+          path: ./file.in
+      - id: activemq-artemis.out
+        type: destination
+        plugin: standalone:activemq@latest
+        name: activemq-artemis-source
+        settings:
+          url: localhost:61613
+          user: admin
+          password: admin
+          destination: example
+          destinationType: ANYCAST
+
+          sdk.record.format: template
+          sdk.record.format.options: '{{ printf "%s" .Payload.After }}'
+
+  - id: activemq-artemis-to-file
+    status: running
+    connectors:
+      - id: activemq-artemis.in
+        type: source
+        plugin: standalone:activemq@latest
+        name: activemq-artemis-source
+        settings:
+          url: localhost:61613
+          user: admin
+          password: admin
+          destination: example
+          subscriptionType: ANYCAST
+          consumerWindowSize: -1
+
+      - id: file.out
+        type: destination
+        plugin: builtin:file
+        name: file-destination
+        settings:
+          path: ./file.out
+          sdk.record.format: template
+          sdk.record.format.options: '{{ printf "%s" .Payload.After }}'
+```
