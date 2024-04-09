@@ -23,7 +23,12 @@ import (
 	"github.com/google/uuid"
 )
 
-func TestAcceptance(t *testing.T) {
+func uniqueDestinationName(t *testing.T) string {
+	hash := uuid.New().String()[0:8]
+	return fmt.Sprintf("/queue/%s_%s", t.Name(), hash)
+}
+
+func TestAcceptance_ANYCAST(t *testing.T) {
 	sourceConfig := map[string]string{
 		"url":              "localhost:61613",
 		"user":             "admin",
@@ -65,6 +70,57 @@ func TestAcceptance(t *testing.T) {
 	sdk.AcceptanceTest(t, driver)
 }
 
-func uniqueDestinationName(t *testing.T) string {
-	return fmt.Sprintf("/queue/%s_%s", t.Name(), uuid.New().String()[0:8])
+func TestAcceptance_ANYCAST_TLS(t *testing.T) {
+	sourceConfig := map[string]string{
+		"url":              "localhost:61617",
+		"user":             "admin",
+		"password":         "admin",
+		"subscriptionType": "ANYCAST",
+
+		// we want to disable artemis flow control, so that messages are delivered as soon as possible.
+		// This prevents source reads from timing out in unexpected ways.
+		"consumerWindowSize": "-1",
+
+		"tls.enabled":            "true",
+		"tls.clientKeyPath":      "./test/certs/client_key.pem",
+		"tls.clientCertPath":     "./test/certs/client_cert.pem",
+		"tls.caCertPath":         "./test/certs/broker.pem",
+		"tls.insecureSkipVerify": "true",
+	}
+
+	destinationConfig := map[string]string{
+		"url":             "localhost:61617",
+		"user":            "admin",
+		"password":        "admin",
+		"destinationType": "ANYCAST",
+
+		"tls.enabled":            "true",
+		"tls.clientKeyPath":      "./test/certs/client_key.pem",
+		"tls.clientCertPath":     "./test/certs/client_cert.pem",
+		"tls.caCertPath":         "./test/certs/broker.pem",
+		"tls.insecureSkipVerify": "true",
+	}
+
+	driver := sdk.ConfigurableAcceptanceTestDriver{
+		Config: sdk.ConfigurableAcceptanceTestDriverConfig{
+			Connector:         Connector,
+			SourceConfig:      sourceConfig,
+			DestinationConfig: destinationConfig,
+			BeforeTest: func(t *testing.T) {
+				destination := uniqueDestinationName(t)
+				sourceConfig["destination"] = destination
+				destinationConfig["destination"] = destination
+				destinationConfig["destinationHeader"] = destination
+			},
+			Skip: []string{
+				// Configure tests are faulty since we rely on paramgen to validate required parameters.
+				"TestSource_Configure_RequiredParams",
+				"TestDestination_Configure_RequiredParams",
+			},
+			WriteTimeout: 500 * time.Millisecond,
+			ReadTimeout:  500 * time.Millisecond,
+		},
+	}
+
+	sdk.AcceptanceTest(t, driver)
 }
