@@ -6,7 +6,7 @@ build:
 	go build -ldflags "-X 'github.com/alarbada/conduit-connector-activemq-artemis.version=${VERSION}'" -o conduit-connector-activemq-artemis cmd/connector/main.go
 
 test: up
-	go test -v -v -race ./...; ret=$$?; \
+	go test -v -race ./...; ret=$$?; \
 		docker compose -f test/docker-compose.yml down; \
 		exit $$ret
 
