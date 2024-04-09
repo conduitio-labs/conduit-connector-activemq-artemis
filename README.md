@@ -22,9 +22,7 @@ Run `make build` to build the connector.
 ## Testing
 Run `make test` to run all the tests. The command will handle starting and stopping docker containers for you.
 
-## Configuration
-
-Both source and destination connectors share the following parameters:
+## Source configuration
 
 | name | description | required | default value |
 | ---- | ----------- | -------- | ------------- |
@@ -39,24 +37,30 @@ Both source and destination connectors share the following parameters:
 | `tls.clientCertPath` | Path to the client certificate file. | false |  |
 | `tls.caCertPath` | Path to the CA certificate file. | false |  |
 | `tls.insecureSkipVerify` | Flag to skip verification of the server's certificate chain and host name | false |  |
-
-(*) Valid time units are "ns", "us" (or "µs"), "ms", "s", "m", "h".
-
-
-### Source configuration
-
-| name | description | required | default value |
-| ---- | ----------- | -------- | ------------- |
 | `consumerWindowSize` | The size of the consumer window. It maps to the "consumer-window-size" header in the STOMP SUBSCRIBE frame. | false | -1 |
 | `subscriptionType` | The subscription type. It can be either ANYCAST or MULTICAST, with ANYCAST being the default. Maps to the "subscription-type" header in the STOMP SUBSCRIBE frame. | false | ANYCAST |
 
-### Destination configuration
+(*) Valid time units are "ns", "us" (or "µs"), "ms", "s", "m", "h".
+
+## Destination configuration
 
 | name | description | required | default value |
 | ---- | ----------- | -------- | ------------- |
+| `url` | URL of the ActiveMQ Artemis broker. | true |  |
+| `user` | The username to use when connecting to the broker. | true |  |
+| `password` | The password to use when connecting to the broker. | true |  |
+| `destination` | The name of the STOMP destination. | true |  |
+| `sendTimeoutHeartbeat` | Specifies the maximum amount of time between the client sending heartbeat notifications from the server. | true | 2s (*) |
+| `recvTimeoutHeartbeat` | Specifies the minimum amount of time between the client expecting to receive heartbeat notifications from the server. | true | 2s (*) |
+| `tls.enabled` | Flag to enable or disable TLS. | false | `false` |
+| `tls.clientKeyPath` | Path to the client key file. | false |  |
+| `tls.clientCertPath` | Path to the client certificate file. | false |  |
+| `tls.caCertPath` | Path to the CA certificate file. | false |  |
+| `tls.insecureSkipVerify` | Flag to skip verification of the server's certificate chain and host name | false |  |
 | `destinationType` | The routing type of the destination. It can be either ANYCAST or MULTICAST, with ANYCAST being the default. Maps to the "destination-type" header in the STOMP SEND frame. | false | ANYCAST |
 | `destinationHeader` | Maps to the "destination" header in the STOMP SEND frame. Useful when using ANYCAST. | false | |
 
+(*) Valid time units are "ns", "us" (or "µs"), "ms", "s", "m", "h".
 
 ## Example pipeline.yml file
 
