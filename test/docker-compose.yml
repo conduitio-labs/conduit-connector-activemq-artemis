@@ -2,34 +2,13 @@ version: '3.8'
 
 services:
   # for development: starts fast, stops faster
-  activemq-artemis-dev:
+  activemq-artemis-test:
     stop_grace_period: 100ms
     image: apache/activemq-artemis:2.32.0
-    container_name: activemq-artemis-dev
+    container_name: activemq-artemis-test
     ports:
       - "61613:61613" # stomp
       - "8161:8161"   # admin
-
-    environment:
-      ARTEMIS_USER: "admin"
-      ARTEMIS_PASSWORD: "admin"
-    healthcheck:
-      test: ["CMD", "curl", "http://localhost:8161"]
-      interval: 100ms
-      timeout: 20s
-      retries: 100
-      start_period: 100ms
-    volumes:
-      # broker.xml is used to customize artemis configuration
-      - ./broker.xml:/var/lib/artemis-instance/etc-override/broker.xml
-      # log4j2.properties is used to add STOMP message logging. Useful for debugging
-      - ./log4j2.properties:/var/lib/artemis-instance/etc-override/log4j2.properties
-
-  activemq-artemis-tls:
-    stop_grace_period: 100ms
-    image: apache/activemq-artemis:2.32.0
-    container_name: activemq-artemis-tls
-    ports:
       - "61617:61617" # stomp-tls
 
     environment:
@@ -43,7 +22,7 @@ services:
       start_period: 100ms
     volumes:
       # broker.xml is used to customize artemis configuration
-      - ./broker-tls.xml:/var/lib/artemis-instance/etc-override/broker.xml
+      - ./broker.xml:/var/lib/artemis-instance/etc-override/broker.xml
       # log4j2.properties is used to add STOMP message logging. Useful for debugging
       - ./log4j2.properties:/var/lib/artemis-instance/etc-override/log4j2.properties
       - ./certs:/certs
