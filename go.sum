@@ -112,8 +112,8 @@ github.com/go-critic/go-critic v0.11.4 h1:O7kGOCx0NDIni4czrkRIXTnit0mkyKOCePh3My
 github.com/go-critic/go-critic v0.11.4/go.mod h1:2QAdo4iuLik5S9YG0rT4wcZ8QxwHYkrr6/2MWAiv/vc=
 github.com/go-logr/logr v1.4.1 h1:pKouT5E8xu9zeFC39JXRDukb6JFQPXM5p5I91188VAQ=
 github.com/go-logr/logr v1.4.1/go.mod h1:9T104GzyrTigFIr8wt5mBrctHMim0Nb2HLGrmQ40KvY=
-github.com/go-stomp/stomp/v3 v3.1.0 h1:JnvRJuua/fX2Lq5Ie5DXzrOL18dnzIUenCZXM6rr8/0=
-github.com/go-stomp/stomp/v3 v3.1.0/go.mod h1:ztzZej6T2W4Y6FlD+Tb5n7HQP3/O5UNQiuC169pIp10=
+github.com/go-stomp/stomp/v3 v3.1.2 h1:kmrNek021BsFUO8rxDhbkOYslRomKO/JIrUCIqyL0r8=
+github.com/go-stomp/stomp/v3 v3.1.2/go.mod h1:ztzZej6T2W4Y6FlD+Tb5n7HQP3/O5UNQiuC169pIp10=
 github.com/go-task/slim-sprig/v3 v3.0.0 h1:sUs3vkvUymDpBKi3qH1YSqBQk9+9D/8M2mN1vB6EwHI=
 github.com/go-task/slim-sprig/v3 v3.0.0/go.mod h1:W848ghGpv3Qj3dhTPRyJypKRiqCdHZiAzKg9hl15HA8=
 github.com/go-toolsmith/astcast v1.1.0 h1:+JN9xZV1A+Re+95pgnMgDboWNVnIMMQXwfBwLRPgSC8=
