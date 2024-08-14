@@ -18,6 +18,8 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/conduitio/conduit-commons/config"
+	"github.com/conduitio/conduit-commons/opencdc"
 	sdk "github.com/conduitio/conduit-connector-sdk"
 	"github.com/go-stomp/stomp/v3"
 )
@@ -46,12 +48,12 @@ func NewDestination() sdk.Destination {
 	return sdk.DestinationWithMiddleware(&Destination{}, sdk.DefaultDestinationMiddleware()...)
 }
 
-func (d *Destination) Parameters() map[string]sdk.Parameter {
+func (d *Destination) Parameters() config.Parameters {
 	return d.config.Parameters()
 }
 
-func (d *Destination) Configure(ctx context.Context, cfg map[string]string) (err error) {
-	err = sdk.Util.ParseConfig(cfg, &d.config)
+func (d *Destination) Configure(ctx context.Context, cfg config.Config) (err error) {
+	err = sdk.Util.ParseConfig(ctx, cfg, &d.config, d.config.Parameters())
 	if err != nil {
 		return fmt.Errorf("failed to parse config: %w", err)
 	}
@@ -70,7 +72,7 @@ func (d *Destination) Open(ctx context.Context) (err error) {
 	return nil
 }
 
-func (d *Destination) Write(ctx context.Context, records []sdk.Record) (int, error) {
+func (d *Destination) Write(ctx context.Context, records []opencdc.Record) (int, error) {
 	for i, rec := range records {
 		err := d.conn.Send(
 			d.config.Destination, "application/json", rec.Bytes(),

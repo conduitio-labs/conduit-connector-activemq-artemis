@@ -21,6 +21,8 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/conduitio/conduit-commons/config"
+	"github.com/conduitio/conduit-commons/opencdc"
 	sdk "github.com/conduitio/conduit-connector-sdk"
 	"github.com/go-stomp/stomp/v3"
 	"github.com/go-stomp/stomp/v3/frame"
@@ -55,12 +57,12 @@ func NewSource() sdk.Source {
 	return sdk.SourceWithMiddleware(&Source{}, sdk.DefaultSourceMiddleware()...)
 }
 
-func (s *Source) Parameters() map[string]sdk.Parameter {
+func (s *Source) Parameters() config.Parameters {
 	return s.config.Parameters()
 }
 
-func (s *Source) Configure(ctx context.Context, cfg map[string]string) error {
-	err := sdk.Util.ParseConfig(cfg, &s.config)
+func (s *Source) Configure(ctx context.Context, cfg config.Config) error {
+	err := sdk.Util.ParseConfig(ctx, cfg, &s.config, s.config.Parameters())
 	if err != nil {
 		return fmt.Errorf("failed to parse config: %w", err)
 	}
@@ -71,7 +73,7 @@ func (s *Source) Configure(ctx context.Context, cfg map[string]string) error {
 	return nil
 }
 
-func (s *Source) Open(ctx context.Context, sdkPos sdk.Position) (err error) {
+func (s *Source) Open(ctx context.Context, sdkPos opencdc.Position) (err error) {
 	s.conn, err = connect(ctx, s.config.Config)
 	if err != nil {
 		return fmt.Errorf("failed to dial to ActiveMQ: %w", err)
@@ -114,8 +116,8 @@ func (s *Source) Open(ctx context.Context, sdkPos sdk.Position) (err error) {
 	return nil
 }
 
-func (s *Source) Read(ctx context.Context) (sdk.Record, error) {
-	var rec sdk.Record
+func (s *Source) Read(ctx context.Context) (opencdc.Record, error) {
+	var rec opencdc.Record
 
 	select {
 	case <-ctx.Done():
@@ -140,8 +142,8 @@ func (s *Source) Read(ctx context.Context) (sdk.Record, error) {
 			}
 			sdkPos   = pos.ToSdkPosition()
 			metadata = metadataFromMsg(msg)
-			key      = sdk.RawData(messageID)
-			payload  = sdk.RawData(msg.Body)
+			key      = opencdc.RawData(messageID)
+			payload  = opencdc.RawData(msg.Body)
 		)
 
 		rec = sdk.Util.Source.NewRecordCreate(sdkPos, metadata, key, payload)
@@ -160,9 +162,9 @@ func (s *Source) Read(ctx context.Context) (sdk.Record, error) {
 }
 
 // metadataFromMsg extracts all the present headers from a stomp.Message into
-// sdk.Metadata.
-func metadataFromMsg(msg *stomp.Message) sdk.Metadata {
-	metadata := make(sdk.Metadata)
+// opencdc.Metadata.
+func metadataFromMsg(msg *stomp.Message) opencdc.Metadata {
+	metadata := make(opencdc.Metadata)
 
 	for i := range msg.Header.Len() {
 		k, v := msg.Header.GetAt(i)
@@ -188,7 +190,7 @@ func metadataFromMsg(msg *stomp.Message) sdk.Metadata {
 	return metadata
 }
 
-func (s *Source) Ack(ctx context.Context, position sdk.Position) error {
+func (s *Source) Ack(ctx context.Context, position opencdc.Position) error {
 	pos, err := parseSDKPosition(position)
 	if err != nil {
 		return fmt.Errorf("failed to parse position: %w", err)
@@ -219,7 +221,7 @@ type Position struct {
 	Destination string `json:"destination"`
 }
 
-func parseSDKPosition(sdkPos sdk.Position) (Position, error) {
+func parseSDKPosition(sdkPos opencdc.Position) (Position, error) {
 	decoder := json.NewDecoder(bytes.NewBuffer(sdkPos))
 	decoder.DisallowUnknownFields()
 
@@ -230,12 +232,12 @@ func parseSDKPosition(sdkPos sdk.Position) (Position, error) {
 	return p, nil
 }
 
-func (p Position) ToSdkPosition() sdk.Position {
+func (p Position) ToSdkPosition() opencdc.Position {
 	bs, err := json.Marshal(p)
 	if err != nil {
 		// this should never happen
 		panic(err)
 	}
 
-	return sdk.Position(bs)
+	return opencdc.Position(bs)
 }

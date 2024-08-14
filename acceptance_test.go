@@ -30,20 +30,20 @@ func uniqueDestinationName(t *testing.T) string {
 
 func TestAcceptance_ANYCAST(t *testing.T) {
 	sourceConfig := map[string]string{
-		"url":              "localhost:61613",
-		"user":             "admin",
-		"password":         "admin",
-		"subscriptionType": "ANYCAST",
+		SourceConfigUrl:              "localhost:61613",
+		SourceConfigUser:             "admin",
+		SourceConfigPassword:         "admin",
+		SourceConfigSubscriptionType: "ANYCAST",
 
 		// we want to disable artemis flow control, so that messages are delivered as soon as possible.
 		// This prevents source reads from timing out in unexpected ways.
-		"consumerWindowSize": "-1",
+		SourceConfigConsumerWindowSize: "-1",
 	}
 	destinationConfig := map[string]string{
-		"url":             "localhost:61613",
-		"user":            "admin",
-		"password":        "admin",
-		"destinationType": "ANYCAST",
+		DestinationConfigUrl:             "localhost:61613",
+		DestinationConfigUser:            "admin",
+		DestinationConfigPassword:        "admin",
+		DestinationConfigDestinationType: "ANYCAST",
 	}
 
 	driver := sdk.ConfigurableAcceptanceTestDriver{
@@ -53,14 +53,9 @@ func TestAcceptance_ANYCAST(t *testing.T) {
 			DestinationConfig: destinationConfig,
 			BeforeTest: func(t *testing.T) {
 				destination := uniqueDestinationName(t)
-				sourceConfig["destination"] = destination
-				destinationConfig["destination"] = destination
-				destinationConfig["destinationHeader"] = destination
-			},
-			Skip: []string{
-				// Configure tests are faulty since we rely on paramgen to validate required parameters.
-				"TestSource_Configure_RequiredParams",
-				"TestDestination_Configure_RequiredParams",
+				sourceConfig[SourceConfigDestination] = destination
+				destinationConfig[DestinationConfigDestination] = destination
+				destinationConfig[DestinationConfigDestinationHeader] = destination
 			},
 			WriteTimeout: 500 * time.Millisecond,
 			ReadTimeout:  500 * time.Millisecond,
@@ -72,33 +67,33 @@ func TestAcceptance_ANYCAST(t *testing.T) {
 
 func TestAcceptance_ANYCAST_TLS(t *testing.T) {
 	sourceConfig := map[string]string{
-		"url":              "localhost:61617",
-		"user":             "admin",
-		"password":         "admin",
-		"subscriptionType": "ANYCAST",
+		SourceConfigUrl:              "localhost:61617",
+		SourceConfigUser:             "admin",
+		SourceConfigPassword:         "admin",
+		SourceConfigSubscriptionType: "ANYCAST",
 
 		// we want to disable artemis flow control, so that messages are delivered as soon as possible.
 		// This prevents source reads from timing out in unexpected ways.
-		"consumerWindowSize": "-1",
+		SourceConfigConsumerWindowSize: "-1",
 
-		"tls.enabled":            "true",
-		"tls.clientKeyPath":      "./test/certs/client_key.pem",
-		"tls.clientCertPath":     "./test/certs/client_cert.pem",
-		"tls.caCertPath":         "./test/certs/broker.pem",
-		"tls.insecureSkipVerify": "true",
+		SourceConfigTlsEnabled:            "true",
+		SourceConfigTlsClientKeyPath:      "./test/certs/client_key.pem",
+		SourceConfigTlsClientCertPath:     "./test/certs/client_cert.pem",
+		SourceConfigTlsCaCertPath:         "./test/certs/broker.pem",
+		SourceConfigTlsInsecureSkipVerify: "true",
 	}
 
 	destinationConfig := map[string]string{
-		"url":             "localhost:61617",
-		"user":            "admin",
-		"password":        "admin",
-		"destinationType": "ANYCAST",
+		DestinationConfigUrl:             "localhost:61617",
+		DestinationConfigUser:            "admin",
+		DestinationConfigPassword:        "admin",
+		DestinationConfigDestinationType: "ANYCAST",
 
-		"tls.enabled":            "true",
-		"tls.clientKeyPath":      "./test/certs/client_key.pem",
-		"tls.clientCertPath":     "./test/certs/client_cert.pem",
-		"tls.caCertPath":         "./test/certs/broker.pem",
-		"tls.insecureSkipVerify": "true",
+		DestinationConfigTlsEnabled:            "true",
+		DestinationConfigTlsClientKeyPath:      "./test/certs/client_key.pem",
+		DestinationConfigTlsClientCertPath:     "./test/certs/client_cert.pem",
+		DestinationConfigTlsCaCertPath:         "./test/certs/broker.pem",
+		DestinationConfigTlsInsecureSkipVerify: "true",
 	}
 
 	driver := sdk.ConfigurableAcceptanceTestDriver{
@@ -108,14 +103,9 @@ func TestAcceptance_ANYCAST_TLS(t *testing.T) {
 			DestinationConfig: destinationConfig,
 			BeforeTest: func(t *testing.T) {
 				destination := uniqueDestinationName(t)
-				sourceConfig["destination"] = destination
-				destinationConfig["destination"] = destination
-				destinationConfig["destinationHeader"] = destination
-			},
-			Skip: []string{
-				// Configure tests are faulty since we rely on paramgen to validate required parameters.
-				"TestSource_Configure_RequiredParams",
-				"TestDestination_Configure_RequiredParams",
+				sourceConfig[SourceConfigDestination] = destination
+				destinationConfig[DestinationConfigDestination] = destination
+				destinationConfig[DestinationConfigDestinationHeader] = destination
 			},
 			WriteTimeout: 500 * time.Millisecond,
 			ReadTimeout:  500 * time.Millisecond,
