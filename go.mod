@@ -5,7 +5,7 @@ go 1.23.2
 require (
 	github.com/conduitio/conduit-commons v0.4.0
 	github.com/conduitio/conduit-connector-sdk v0.11.0
-	github.com/go-stomp/stomp/v3 v3.1.2
+	github.com/go-stomp/stomp/v3 v3.1.3
 	github.com/goccy/go-json v0.10.3
 	github.com/golangci/golangci-lint v1.61.0
 	github.com/google/uuid v1.6.0
