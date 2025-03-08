@@ -2,7 +2,20 @@ version: "1.0"
 specification:
   name: activemq
   summary: An ActiveMQ Artemis source and destination plugin for Conduit, written in Go.
-  description: An ActiveMQ Artemis source and destination plugin for Conduit, written in Go.
+  description: |
+    The ActiveMQ Classic connector is one of [Conduit](https://conduit.io) plugins. The connector provides both a source and a destination connector for [ActiveMQ Artemis](https://activemq.apache.org/components/artemis/).
+
+    It uses the [stomp protocol](https://stomp.github.io/) to connect to ActiveMQ.
+
+    ## What data does the OpenCDC record consist of?
+
+    - `record.Position`: json object with the destination and the messageId frame header.
+    - `record.Operation`: currently fixed as "create".
+    - `record.Metadata`: a string to string map, with keys prefixed as `activemq.header.{STOMP_HEADER_NAME}`.
+    - `record.Key`: the messageId frame header.
+    - `record.Payload.Before`: <empty>
+    - `record.Payload.After`: the message body
+
   version: (devel)
   author: Meroxa, Inc.
   source:

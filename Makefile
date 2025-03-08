@@ -12,6 +12,7 @@ test: up
 
 generate:
 	go generate ./...
+	conn-sdk-cli readmegen -w
 
 install-paramgen:
 	go install github.com/conduitio/conduit-connector-sdk/cmd/paramgen@latest
