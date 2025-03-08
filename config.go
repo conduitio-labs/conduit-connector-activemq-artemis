@@ -15,14 +15,8 @@
 package activemq
 
 import (
-	"context"
 	"time"
-
-	sdk "github.com/conduitio/conduit-connector-sdk"
 )
-
-//go:generate paramgen -output=paramgen_src.go SourceConfig
-//go:generate paramgen -output=paramgen_dest.go DestinationConfig
 
 type Config struct {
 	// URL is the URL of the ActiveMQ Artemis broker.
@@ -46,15 +40,6 @@ type Config struct {
 	RecvTimeoutHeartbeat time.Duration `json:"recvTimeoutHeartbeat" default:"2s"`
 
 	TLS TLSConfig `json:"tls"`
-}
-
-func (c Config) logConfig(ctx context.Context, msg string) {
-	sdk.Logger(ctx).Debug().
-		Str("url", c.URL).
-		Str("destination", c.Destination).
-		Str("sendTimeoutHeartbeat", c.SendTimeoutHeartbeat.String()).
-		Str("recvTimeoutHeartbeat", c.RecvTimeoutHeartbeat.String()).
-		Bool("tlsEnabled", c.TLS.Enabled).Msg(msg)
 }
 
 type TLSConfig struct {

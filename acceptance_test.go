@@ -30,20 +30,20 @@ func uniqueDestinationName(t *testing.T) string {
 
 func TestAcceptance_ANYCAST(t *testing.T) {
 	sourceConfig := map[string]string{
-		SourceConfigUrl:              "localhost:61613",
-		SourceConfigUser:             "admin",
-		SourceConfigPassword:         "admin",
-		SourceConfigSubscriptionType: "ANYCAST",
+		"url":              "localhost:61613",
+		"user":             "admin",
+		"password":         "admin",
+		"subscriptionType": "ANYCAST",
 
 		// we want to disable artemis flow control, so that messages are delivered as soon as possible.
 		// This prevents source reads from timing out in unexpected ways.
-		SourceConfigConsumerWindowSize: "-1",
+		"consumerWindowSize": "-1",
 	}
 	destinationConfig := map[string]string{
-		DestinationConfigUrl:             "localhost:61613",
-		DestinationConfigUser:            "admin",
-		DestinationConfigPassword:        "admin",
-		DestinationConfigDestinationType: "ANYCAST",
+		"url":             "localhost:61613",
+		"user":            "admin",
+		"password":        "admin",
+		"destinationType": "ANYCAST",
 	}
 
 	driver := sdk.ConfigurableAcceptanceTestDriver{
@@ -53,9 +53,9 @@ func TestAcceptance_ANYCAST(t *testing.T) {
 			DestinationConfig: destinationConfig,
 			BeforeTest: func(t *testing.T) {
 				destination := uniqueDestinationName(t)
-				sourceConfig[SourceConfigDestination] = destination
-				destinationConfig[DestinationConfigDestination] = destination
-				destinationConfig[DestinationConfigDestinationHeader] = destination
+				sourceConfig["destination"] = destination
+				destinationConfig["destination"] = destination
+				destinationConfig["destinationHeader"] = destination
 			},
 			WriteTimeout: 500 * time.Millisecond,
 			ReadTimeout:  500 * time.Millisecond,
@@ -67,33 +67,33 @@ func TestAcceptance_ANYCAST(t *testing.T) {
 
 func TestAcceptance_ANYCAST_TLS(t *testing.T) {
 	sourceConfig := map[string]string{
-		SourceConfigUrl:              "localhost:61617",
-		SourceConfigUser:             "admin",
-		SourceConfigPassword:         "admin",
-		SourceConfigSubscriptionType: "ANYCAST",
+		"url":              "localhost:61617",
+		"user":             "admin",
+		"password":         "admin",
+		"subscriptionType": "ANYCAST",
 
 		// we want to disable artemis flow control, so that messages are delivered as soon as possible.
 		// This prevents source reads from timing out in unexpected ways.
-		SourceConfigConsumerWindowSize: "-1",
+		"consumerWindowSize": "-1",
 
-		SourceConfigTlsEnabled:            "true",
-		SourceConfigTlsClientKeyPath:      "./test/certs/client_key.pem",
-		SourceConfigTlsClientCertPath:     "./test/certs/client_cert.pem",
-		SourceConfigTlsCaCertPath:         "./test/certs/broker.pem",
-		SourceConfigTlsInsecureSkipVerify: "true",
+		"tls.enabled":            "true",
+		"tls.clientKeyPath":      "./test/certs/client_key.pem",
+		"tls.clientCertPath":     "./test/certs/client_cert.pem",
+		"tls.caCertPath":         "./test/certs/broker.pem",
+		"tls.insecureSkipVerify": "true",
 	}
 
 	destinationConfig := map[string]string{
-		DestinationConfigUrl:             "localhost:61617",
-		DestinationConfigUser:            "admin",
-		DestinationConfigPassword:        "admin",
-		DestinationConfigDestinationType: "ANYCAST",
+		"url":             "localhost:61617",
+		"user":            "admin",
+		"password":        "admin",
+		"destinationType": "ANYCAST",
 
-		DestinationConfigTlsEnabled:            "true",
-		DestinationConfigTlsClientKeyPath:      "./test/certs/client_key.pem",
-		DestinationConfigTlsClientCertPath:     "./test/certs/client_cert.pem",
-		DestinationConfigTlsCaCertPath:         "./test/certs/broker.pem",
-		DestinationConfigTlsInsecureSkipVerify: "true",
+		"tls.enabled":            "true",
+		"tls.clientKeyPath":      "./test/certs/client_key.pem",
+		"tls.clientCertPath":     "./test/certs/client_cert.pem",
+		"tls.caCertPath":         "./test/certs/broker.pem",
+		"tls.insecureSkipVerify": "true",
 	}
 
 	driver := sdk.ConfigurableAcceptanceTestDriver{
@@ -103,9 +103,9 @@ func TestAcceptance_ANYCAST_TLS(t *testing.T) {
 			DestinationConfig: destinationConfig,
 			BeforeTest: func(t *testing.T) {
 				destination := uniqueDestinationName(t)
-				sourceConfig[SourceConfigDestination] = destination
-				destinationConfig[DestinationConfigDestination] = destination
-				destinationConfig[DestinationConfigDestinationHeader] = destination
+				sourceConfig["destination"] = destination
+				destinationConfig["destination"] = destination
+				destinationConfig["destinationHeader"] = destination
 			},
 			WriteTimeout: 500 * time.Millisecond,
 			ReadTimeout:  500 * time.Millisecond,
