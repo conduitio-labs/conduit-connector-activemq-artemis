@@ -21,7 +21,6 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/conduitio/conduit-commons/config"
 	"github.com/conduitio/conduit-commons/opencdc"
 	sdk "github.com/conduitio/conduit-connector-sdk"
 	"github.com/go-stomp/stomp/v3"
@@ -32,6 +31,8 @@ import (
 
 type SourceConfig struct {
 	Config
+
+	sdk.DefaultSourceMiddleware
 
 	// ConsumerWindowSize is the size of the consumer window.
 	// It maps to the "consumer-window-size" header in the STOMP SUBSCRIBE frame.
@@ -53,24 +54,14 @@ type Source struct {
 	storedMessages cmap.ConcurrentMap[string, *stomp.Message]
 }
 
+func (s *Source) Config() sdk.SourceConfig {
+	return &s.config
+}
+
 func NewSource() sdk.Source {
-	return sdk.SourceWithMiddleware(&Source{}, sdk.DefaultSourceMiddleware()...)
-}
-
-func (s *Source) Parameters() config.Parameters {
-	return s.config.Parameters()
-}
-
-func (s *Source) Configure(ctx context.Context, cfg config.Config) error {
-	err := sdk.Util.ParseConfig(ctx, cfg, &s.config, s.config.Parameters())
-	if err != nil {
-		return fmt.Errorf("failed to parse config: %w", err)
-	}
-	s.config.logConfig(ctx, "configured source")
-
-	s.storedMessages = cmap.New[*stomp.Message]()
-
-	return nil
+	return sdk.SourceWithMiddleware(&Source{
+		storedMessages: cmap.New[*stomp.Message](),
+	})
 }
 
 func (s *Source) Open(ctx context.Context, sdkPos opencdc.Position) (err error) {
