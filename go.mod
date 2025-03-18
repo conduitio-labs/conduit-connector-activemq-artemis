@@ -7,7 +7,7 @@ require (
 	github.com/conduitio/conduit-connector-sdk v0.13.2
 	github.com/go-stomp/stomp/v3 v3.1.3
 	github.com/goccy/go-json v0.10.5
-	github.com/golangci/golangci-lint v1.64.7
+	github.com/golangci/golangci-lint v1.64.8
 	github.com/google/uuid v1.6.0
 	github.com/matryer/is v1.4.1
 	github.com/orcaman/concurrent-map/v2 v2.0.1
