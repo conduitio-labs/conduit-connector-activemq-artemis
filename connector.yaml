@@ -15,7 +15,7 @@ specification:
     - `record.Key`: the messageId frame header.
     - `record.Payload.Before`: <empty>
     - `record.Payload.After`: the message body
-  version: v0.1.0
+  version: v0.1.1
   author: Meroxa, Inc.
   source:
     parameters:
