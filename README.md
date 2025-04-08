@@ -11,7 +11,7 @@ It uses the [stomp protocol](https://stomp.github.io/) to connect to ActiveMQ.
 - `record.Operation`: currently fixed as "create".
 - `record.Metadata`: a string to string map, with keys prefixed as `activemq.header.{STOMP_HEADER_NAME}`.
 - `record.Key`: the messageId frame header.
-- `record.Payload.Before`: <empty>
+- `record.Payload.Before`: empty
 - `record.Payload.After`: the message body<!-- /readmegen:description -->
 
 ## How to build?
