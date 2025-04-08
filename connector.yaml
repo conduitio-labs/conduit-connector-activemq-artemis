@@ -13,7 +13,7 @@ specification:
     - `record.Operation`: currently fixed as "create".
     - `record.Metadata`: a string to string map, with keys prefixed as `activemq.header.{STOMP_HEADER_NAME}`.
     - `record.Key`: the messageId frame header.
-    - `record.Payload.Before`: <empty>
+    - `record.Payload.Before`: empty
     - `record.Payload.After`: the message body
   version: v0.1.1
   author: Meroxa, Inc.
