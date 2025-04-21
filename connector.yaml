@@ -20,28 +20,28 @@ specification:
   source:
     parameters:
       - name: destination
-        description: Destination is the name of the STOMP destination.
+        description: The name of the STOMP destination.
         type: string
         default: ""
         validations:
           - type: required
             value: ""
       - name: password
-        description: Password is the password to use when connecting to the broker.
+        description: The password to use when connecting to the broker.
         type: string
         default: ""
         validations:
           - type: required
             value: ""
       - name: url
-        description: URL is the URL of the ActiveMQ Artemis broker.
+        description: The URL of the ActiveMQ Artemis broker.
         type: string
         default: ""
         validations:
           - type: required
             value: ""
       - name: user
-        description: User is the username to use when connecting to the broker.
+        description: The username to use when connecting to the broker.
         type: string
         default: ""
         validations:
@@ -49,55 +49,55 @@ specification:
             value: ""
       - name: consumerWindowSize
         description: |-
-          ConsumerWindowSize is the size of the consumer window.
+          The size of the consumer window.
           It maps to the "consumer-window-size" header in the STOMP SUBSCRIBE frame.
         type: string
         default: "-1"
         validations: []
       - name: recvTimeoutHeartbeat
         description: |-
-          RecvTimeoutHeartbeat specifies the minimum amount of time between the
-          client expecting to receive heartbeat notifications from the server
+          The minimum amount of time between the client expecting to receive
+          heartbeat notifications from the server.
         type: duration
         default: 2s
         validations: []
       - name: sendTimeoutHeartbeat
         description: |-
-          SendTimeoutHeartbeat specifies the maximum amount of time between the
-          client sending heartbeat notifications from the server
+          The maximum amount of time between the
+          client sending heartbeat notifications from the server.
         type: duration
         default: 2s
         validations: []
       - name: subscriptionType
         description: |-
-          SubscriptionType is the subscription type. It can be either
-          ANYCAST or MULTICAST, with ANYCAST being the default.
+          The subscription type. It can be either ANYCAST or MULTICAST, with
+          ANYCAST being the default.
           Maps to the "subscription-type" header in the STOMP SUBSCRIBE frame.
         type: string
         default: ANYCAST
         validations: []
       - name: tls.caCertPath
-        description: CaCertPath is the path to the CA certificate file.
+        description: The path to the CA certificate file.
         type: string
         default: ""
         validations: []
       - name: tls.clientCertPath
-        description: ClientCertPath is the path to the client certificate file.
+        description: The path to the client certificate file.
         type: string
         default: ""
         validations: []
       - name: tls.clientKeyPath
-        description: ClientKeyPath is the path to the client key file.
+        description: The path to the client key file.
         type: string
         default: ""
         validations: []
       - name: tls.enabled
-        description: Enabled is a flag to enable or disable TLS.
+        description: Flag to enable or disable TLS.
         type: bool
         default: "false"
         validations: []
       - name: tls.insecureSkipVerify
-        description: InsecureSkipVerify is a flag to disable server certificate verification.
+        description: Flag to disable server certificate verification.
         type: bool
         default: "false"
         validations: []
@@ -164,28 +164,28 @@ specification:
   destination:
     parameters:
       - name: destination
-        description: Destination is the name of the STOMP destination.
+        description: The name of the STOMP destination.
         type: string
         default: ""
         validations:
           - type: required
             value: ""
       - name: password
-        description: Password is the password to use when connecting to the broker.
+        description: The password to use when connecting to the broker.
         type: string
         default: ""
         validations:
           - type: required
             value: ""
       - name: url
-        description: URL is the URL of the ActiveMQ Artemis broker.
+        description: The URL of the ActiveMQ Artemis broker.
         type: string
         default: ""
         validations:
           - type: required
             value: ""
       - name: user
-        description: User is the username to use when connecting to the broker.
+        description: The username to use when connecting to the broker.
         type: string
         default: ""
         validations:
@@ -193,55 +193,55 @@ specification:
             value: ""
       - name: destinationHeader
         description: |-
-          DestinationHeader maps to the "destination" header in the STOMP SEND
-          frame. Useful when using ANYCAST.
+          The "destination" header in the STOMP SEND frame. Useful when using
+          ANYCAST.
         type: string
         default: ""
         validations: []
       - name: destinationType
         description: |-
-          DestinationType is the routing type of the destination. It can be either
-          ANYCAST or MULTICAST, with ANYCAST being the default.
+          The routing type of the destination. It can be either ANYCAST or
+          MULTICAST, with ANYCAST being the default.
           Maps to the "destination-type" header in the STOMP SEND frame.
         type: string
         default: ANYCAST
         validations: []
       - name: recvTimeoutHeartbeat
         description: |-
-          RecvTimeoutHeartbeat specifies the minimum amount of time between the
-          client expecting to receive heartbeat notifications from the server
+          The minimum amount of time between the client expecting to receive
+          heartbeat notifications from the server.
         type: duration
         default: 2s
         validations: []
       - name: sendTimeoutHeartbeat
         description: |-
-          SendTimeoutHeartbeat specifies the maximum amount of time between the
-          client sending heartbeat notifications from the server
+          The maximum amount of time between the
+          client sending heartbeat notifications from the server.
         type: duration
         default: 2s
         validations: []
       - name: tls.caCertPath
-        description: CaCertPath is the path to the CA certificate file.
+        description: The path to the CA certificate file.
         type: string
         default: ""
         validations: []
       - name: tls.clientCertPath
-        description: ClientCertPath is the path to the client certificate file.
+        description: The path to the client certificate file.
         type: string
         default: ""
         validations: []
       - name: tls.clientKeyPath
-        description: ClientKeyPath is the path to the client key file.
+        description: The path to the client key file.
         type: string
         default: ""
         validations: []
       - name: tls.enabled
-        description: Enabled is a flag to enable or disable TLS.
+        description: Flag to enable or disable TLS.
         type: bool
         default: "false"
         validations: []
       - name: tls.insecureSkipVerify
-        description: InsecureSkipVerify is a flag to disable server certificate verification.
+        description: Flag to disable server certificate verification.
         type: bool
         default: "false"
         validations: []

@@ -34,62 +34,60 @@ pipelines:
       - id: example
         plugin: "activemq"
         settings:
-          # Destination is the name of the STOMP destination.
+          # The name of the STOMP destination.
           # Type: string
           # Required: yes
           destination: ""
-          # Password is the password to use when connecting to the broker.
+          # The password to use when connecting to the broker.
           # Type: string
           # Required: yes
           password: ""
-          # URL is the URL of the ActiveMQ Artemis broker.
+          # The URL of the ActiveMQ Artemis broker.
           # Type: string
           # Required: yes
           url: ""
-          # User is the username to use when connecting to the broker.
+          # The username to use when connecting to the broker.
           # Type: string
           # Required: yes
           user: ""
-          # ConsumerWindowSize is the size of the consumer window. It maps to
-          # the "consumer-window-size" header in the STOMP SUBSCRIBE frame.
+          # The size of the consumer window. It maps to the
+          # "consumer-window-size" header in the STOMP SUBSCRIBE frame.
           # Type: string
           # Required: no
           consumerWindowSize: "-1"
-          # RecvTimeoutHeartbeat specifies the minimum amount of time between
-          # the client expecting to receive heartbeat notifications from the
-          # server
+          # The minimum amount of time between the client expecting to receive
+          # heartbeat notifications from the server.
           # Type: duration
           # Required: no
           recvTimeoutHeartbeat: "2s"
-          # SendTimeoutHeartbeat specifies the maximum amount of time between
-          # the client sending heartbeat notifications from the server
+          # The maximum amount of time between the client sending heartbeat
+          # notifications from the server.
           # Type: duration
           # Required: no
           sendTimeoutHeartbeat: "2s"
-          # SubscriptionType is the subscription type. It can be either ANYCAST
-          # or MULTICAST, with ANYCAST being the default. Maps to the
-          # "subscription-type" header in the STOMP SUBSCRIBE frame.
+          # The subscription type. It can be either ANYCAST or MULTICAST, with
+          # ANYCAST being the default. Maps to the "subscription-type" header in
+          # the STOMP SUBSCRIBE frame.
           # Type: string
           # Required: no
           subscriptionType: "ANYCAST"
-          # CaCertPath is the path to the CA certificate file.
+          # The path to the CA certificate file.
           # Type: string
           # Required: no
           tls.caCertPath: ""
-          # ClientCertPath is the path to the client certificate file.
+          # The path to the client certificate file.
           # Type: string
           # Required: no
           tls.clientCertPath: ""
-          # ClientKeyPath is the path to the client key file.
+          # The path to the client key file.
           # Type: string
           # Required: no
           tls.clientKeyPath: ""
-          # Enabled is a flag to enable or disable TLS.
+          # Flag to enable or disable TLS.
           # Type: bool
           # Required: no
           tls.enabled: "false"
-          # InsecureSkipVerify is a flag to disable server certificate
-          # verification.
+          # Flag to disable server certificate verification.
           # Type: bool
           # Required: no
           tls.insecureSkipVerify: "false"
@@ -152,62 +150,60 @@ pipelines:
       - id: example
         plugin: "activemq"
         settings:
-          # Destination is the name of the STOMP destination.
+          # The name of the STOMP destination.
           # Type: string
           # Required: yes
           destination: ""
-          # Password is the password to use when connecting to the broker.
+          # The password to use when connecting to the broker.
           # Type: string
           # Required: yes
           password: ""
-          # URL is the URL of the ActiveMQ Artemis broker.
+          # The URL of the ActiveMQ Artemis broker.
           # Type: string
           # Required: yes
           url: ""
-          # User is the username to use when connecting to the broker.
+          # The username to use when connecting to the broker.
           # Type: string
           # Required: yes
           user: ""
-          # DestinationHeader maps to the "destination" header in the STOMP SEND
-          # frame. Useful when using ANYCAST.
+          # The "destination" header in the STOMP SEND frame. Useful when using
+          # ANYCAST.
           # Type: string
           # Required: no
           destinationHeader: ""
-          # DestinationType is the routing type of the destination. It can be
-          # either ANYCAST or MULTICAST, with ANYCAST being the default. Maps to
-          # the "destination-type" header in the STOMP SEND frame.
+          # The routing type of the destination. It can be either ANYCAST or
+          # MULTICAST, with ANYCAST being the default. Maps to the
+          # "destination-type" header in the STOMP SEND frame.
           # Type: string
           # Required: no
           destinationType: "ANYCAST"
-          # RecvTimeoutHeartbeat specifies the minimum amount of time between
-          # the client expecting to receive heartbeat notifications from the
-          # server
+          # The minimum amount of time between the client expecting to receive
+          # heartbeat notifications from the server.
           # Type: duration
           # Required: no
           recvTimeoutHeartbeat: "2s"
-          # SendTimeoutHeartbeat specifies the maximum amount of time between
-          # the client sending heartbeat notifications from the server
+          # The maximum amount of time between the client sending heartbeat
+          # notifications from the server.
           # Type: duration
           # Required: no
           sendTimeoutHeartbeat: "2s"
-          # CaCertPath is the path to the CA certificate file.
+          # The path to the CA certificate file.
           # Type: string
           # Required: no
           tls.caCertPath: ""
-          # ClientCertPath is the path to the client certificate file.
+          # The path to the client certificate file.
           # Type: string
           # Required: no
           tls.clientCertPath: ""
-          # ClientKeyPath is the path to the client key file.
+          # The path to the client key file.
           # Type: string
           # Required: no
           tls.clientKeyPath: ""
-          # Enabled is a flag to enable or disable TLS.
+          # Flag to enable or disable TLS.
           # Type: bool
           # Required: no
           tls.enabled: "false"
-          # InsecureSkipVerify is a flag to disable server certificate
-          # verification.
+          # Flag to disable server certificate verification.
           # Type: bool
           # Required: no
           tls.insecureSkipVerify: "false"
