@@ -34,12 +34,12 @@ type SourceConfig struct {
 
 	sdk.DefaultSourceMiddleware
 
-	// ConsumerWindowSize is the size of the consumer window.
+	// The size of the consumer window.
 	// It maps to the "consumer-window-size" header in the STOMP SUBSCRIBE frame.
 	ConsumerWindowSize string `json:"consumerWindowSize" default:"-1"`
 
-	// SubscriptionType is the subscription type. It can be either
-	// ANYCAST or MULTICAST, with ANYCAST being the default.
+	// The subscription type. It can be either ANYCAST or MULTICAST, with
+	// ANYCAST being the default.
 	// Maps to the "subscription-type" header in the STOMP SUBSCRIBE frame.
 	SubscriptionType string `json:"subscriptionType" default:"ANYCAST" validation:"inclusion=ANYCAST|MULTICAST"`
 }

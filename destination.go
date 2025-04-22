@@ -28,13 +28,13 @@ type DestinationConfig struct {
 
 	sdk.DefaultDestinationMiddleware
 
-	// DestinationType is the routing type of the destination. It can be either
-	// ANYCAST or MULTICAST, with ANYCAST being the default.
+	// The routing type of the destination. It can be either ANYCAST or
+	// MULTICAST, with ANYCAST being the default.
 	// Maps to the "destination-type" header in the STOMP SEND frame.
 	DestinationType string `json:"destinationType" default:"ANYCAST" validation:"inclusion=ANYCAST|MULTICAST"`
 
-	// DestinationHeader maps to the "destination" header in the STOMP SEND
-	// frame. Useful when using ANYCAST.
+	// The "destination" header in the STOMP SEND frame. Useful when using
+	// ANYCAST.
 	DestinationHeader string `json:"destinationHeader"`
 }
 
