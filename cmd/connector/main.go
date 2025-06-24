@@ -15,7 +15,7 @@
 package main
 
 import (
-	activemq "github.com/alarbada/conduit-connector-activemq-artemis"
+	activemq "github.com/conduitio-labs/conduit-connector-activemq-artemis"
 	sdk "github.com/conduitio/conduit-connector-sdk"
 )
 

@@ -2,7 +2,7 @@ VERSION=$(shell git describe --tags --dirty --always)
 
 .PHONY: build
 build:
-	go build -ldflags "-X 'github.com/alarbada/conduit-connector-activemq-artemis.version=${VERSION}'" -o conduit-connector-activemq-artemis cmd/connector/main.go
+	go build -ldflags "-X 'github.com/conduitio-labs/conduit-connector-activemq-artemis.version=${VERSION}'" -o conduit-connector-activemq-artemis cmd/connector/main.go
 
 .PHONY: test
 test: up

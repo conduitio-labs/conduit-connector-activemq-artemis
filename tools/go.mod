@@ -1,4 +1,4 @@
-module github.com/alarbada/conduit-connector-activemq-artemis/tools
+module github.com/conduitio-labs/conduit-connector-activemq-artemis/tools
 
 go 1.24.2
 
