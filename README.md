@@ -1,7 +1,7 @@
 # Conduit Connector for Activemq Artemis
 
 <!-- readmegen:description -->
-The ActiveMQ Classic connector is one of [Conduit](https://conduit.io) plugins. The connector provides both a source and a destination connector for [ActiveMQ Artemis](https://activemq.apache.org/components/artemis/).
+The ActiveMQ Artemis connector is one of [Conduit](https://conduit.io) plugins. The connector provides both a source and a destination connector for [ActiveMQ Artemis](https://activemq.apache.org/components/artemis/).
 
 It uses the [stomp protocol](https://stomp.github.io/) to connect to ActiveMQ.
 
